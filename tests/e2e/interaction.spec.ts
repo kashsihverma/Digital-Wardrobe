@@ -3,25 +3,27 @@ import { expect, test } from '@playwright/test';
 const baseURL = 'http://127.0.0.1:4321';
 
 test('routes render and primary controls respond', async ({ page }) => {
+	test.setTimeout(60000);
 	const errors: string[] = [];
 	page.on('pageerror', (error) => errors.push(error.message));
 	page.on('console', (message) => {
 		if (message.type() === 'error') errors.push(message.text());
 	});
 
-	for (const path of ['/', '/wardrobe', '/wardrobe/camel-blazer', '/outfits', '/planner', '/discover', '/collections', '/insights', '/settings']) {
+	for (const path of ['/', '/wardrobe', '/wardrobe/camel-blazer', '/outfits', '/planner', '/discover', '/collections', '/insights', '/settings', '/sign-in']) {
 		const response = await page.goto(`${baseURL}${path}`);
 		expect(response?.ok(), path).toBeTruthy();
 	}
 
 	await page.goto(baseURL);
+	await expect(page.getByRole('link', { name: /sign in/i })).toBeVisible();
 	await page.getByRole('button', { name: /add item/i }).first().click();
 	await expect(page.getByRole('heading', { name: /add wardrobe item/i })).toBeVisible();
 	await page.getByRole('button', { name: /upload image/i }).click();
 	await expect(page.locator('#dw-toast-region')).toContainText(/Upload image selected/);
-	await page.getByLabel(/paste image/i).fill('https://example.com/camel-blazer.png');
+	await page.getByLabel(/image url/i).fill('https://example.com/camel-blazer.png');
 	await page.getByRole('button', { name: /^save$/i }).click();
-	await expect(page.locator('#dw-toast-region')).toContainText(/private draft/i);
+	await expect(page.locator('#dw-toast-region')).toContainText(/sign in/i);
 	await page.getByLabel(/close upload dialog/i).click();
 
 	await page.goto(`${baseURL}/wardrobe`);
@@ -65,6 +67,10 @@ test('routes render and primary controls respond', async ({ page }) => {
 	await expect(page.locator('[data-settings-title]')).toHaveText('Profile');
 	await page.getByRole('button', { name: /save preference/i }).click();
 	await expect(page.locator('#dw-toast-region')).toContainText(/Settings saved/i);
+
+	await page.goto(`${baseURL}/sign-in`);
+	await expect(page.getByRole('heading', { name: /your closet data stays behind your account/i })).toBeVisible();
+	await expect(page.getByRole('button', { name: /continue with google/i })).toBeVisible();
 
 	expect(errors).toEqual([]);
 });

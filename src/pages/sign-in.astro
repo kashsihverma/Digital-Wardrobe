@@ -1,0 +1,62 @@
+---
+import { LockKeyhole, ShieldCheck, Sparkles } from '@lucide/astro';
+import AuthForm from '../components/auth/AuthForm';
+import AppShell from '../components/layout/AppShell.astro';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Sign in | Digital Wardrobe" description="Sign in to Digital Wardrobe with Google or email and password.">
+	<AppShell active="/sign-in">
+		<section class="bg-canvas-soft py-10 md:py-16">
+			<div class="container-page grid gap-6 lg:grid-cols-[1fr_420px]">
+				<section class="overflow-hidden rounded-lg border border-hairline bg-canvas shadow-[var(--shadow-card)]">
+					<div class="grid min-h-[520px] lg:grid-cols-[1fr_1fr]">
+						<div class="relative flex flex-col justify-between bg-ink p-6 text-white md:p-8">
+							<div class="absolute inset-0 opacity-70" aria-hidden="true">
+								<div class="h-full w-full bg-[radial-gradient(circle_at_15%_20%,#007cf0_0,transparent_28%),radial-gradient(circle_at_85%_10%,#7928ca_0,transparent_24%),radial-gradient(circle_at_75%_80%,#ff0080_0,transparent_30%),radial-gradient(circle_at_20%_90%,#f9cb28_0,transparent_24%)] blur-2xl" />
+							</div>
+							<div class="relative">
+								<p class="font-mono text-xs text-white/70">AUTHENTICATION</p>
+								<h2 class="mt-4 max-w-sm text-3xl font-semibold leading-10 tracking-[-0.96px]">
+									Your closet data stays behind your account.
+								</h2>
+							</div>
+							<div class="relative grid gap-3">
+								{[
+									[ShieldCheck, 'Google sign-in with account picker.'],
+									[LockKeyhole, 'Email and password auth with persistent sessions.'],
+									[Sparkles, 'Redirects straight into your wardrobe.'],
+								].map(([Icon, text]) => (
+									<div class="flex items-center gap-3 rounded-lg border border-white/10 bg-white/10 p-3 text-sm text-white/80">
+										<Icon size={16} strokeWidth={1.8} />
+										<span>{text}</span>
+									</div>
+								))}
+							</div>
+						</div>
+						<div class="bg-canvas p-6 md:p-8">
+							<AuthForm client:load />
+						</div>
+					</div>
+				</section>
+
+				<aside class="grid content-start gap-4">
+					<article class="rounded-lg border border-hairline bg-canvas p-5 shadow-[var(--shadow-card)]">
+						<p class="font-mono text-xs text-body">FIREBASE SETUP</p>
+						<h2 class="mt-2 text-lg font-semibold text-ink">Enable the providers once.</h2>
+						<p class="mt-2 text-sm leading-6 text-body">
+							In Firebase Authentication, turn on Google and Email/Password. Add this site's local and production domains as authorized domains.
+						</p>
+					</article>
+					<article class="rounded-lg border border-hairline bg-canvas p-5 shadow-[var(--shadow-card)]">
+						<p class="font-mono text-xs text-body">ENVIRONMENT</p>
+						<h2 class="mt-2 text-lg font-semibold text-ink">Use public web app keys.</h2>
+						<p class="mt-2 text-sm leading-6 text-body">
+							Copy <span class="font-mono text-xs">.env.example</span> to <span class="font-mono text-xs">.env</span> and fill in the Firebase web config values.
+						</p>
+					</article>
+				</aside>
+			</div>
+		</section>
+	</AppShell>
+</Layout>

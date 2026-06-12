@@ -7,7 +7,9 @@ import ItemCard from '../components/wardrobe/ItemCard.astro';
 import OutfitCard from '../components/wardrobe/OutfitCard.astro';
 import SearchBox from '../components/wardrobe/SearchBox.astro';
 import SuggestionCard from '../components/wardrobe/SuggestionCard.astro';
-import { outfits, suggestions, wardrobeItems } from '../data/wardrobe';
+import { getWardrobeViewData } from '../lib/wardrobeData';
+
+const { outfits, suggestions, wardrobeItems } = await getWardrobeViewData();
 
 const ideas = [
 	{

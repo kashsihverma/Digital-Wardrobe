@@ -8,6 +8,7 @@ export type WardrobeItem = {
 	occasion: string;
 	brand: string;
 	notes: string;
+	imageUrl?: string;
 	wears: number;
 	lastWorn: string;
 	status: 'ready' | 'review' | 'underused' | 'favorite';

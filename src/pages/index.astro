@@ -10,10 +10,11 @@ import ItemCard from '../components/wardrobe/ItemCard.astro';
 import OutfitCard from '../components/wardrobe/OutfitCard.astro';
 import StatCard from '../components/wardrobe/StatCard.astro';
 import SuggestionCard from '../components/wardrobe/SuggestionCard.astro';
-import { events, insights, outfits, suggestions, wardrobeItems } from '../data/wardrobe';
 import { itemImages } from '../lib/itemImages';
+import { getWardrobeViewData } from '../lib/wardrobeData';
 
 const heroStripItems = ['camel-blazer', 'ivory-knit', 'sage-overshirt', 'structured-tote'];
+const { events, insights, outfits, suggestions, wardrobeItems } = await getWardrobeViewData();
 ---
 
 <Layout title="Digital Wardrobe | Private outfit planning and wardrobe intelligence">

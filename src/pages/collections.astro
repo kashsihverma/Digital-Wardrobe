@@ -4,7 +4,9 @@ import Layout from '../layouts/Layout.astro';
 import AppShell from '../components/layout/AppShell.astro';
 import ProductNav from '../components/layout/ProductNav.astro';
 import ItemPhoto from '../components/wardrobe/ItemPhoto.astro';
-import { wardrobeItems } from '../data/wardrobe';
+import { getWardrobeViewData } from '../lib/wardrobeData';
+
+const { wardrobeItems } = await getWardrobeViewData();
 
 const collections = [
 	{ title: 'June work capsule', items: wardrobeItems.slice(0, 5), note: 'Five-piece base for client days.' },

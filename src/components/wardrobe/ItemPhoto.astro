@@ -19,7 +19,15 @@ const alt = `${item.name} product photo`;
 ---
 
 <div class:list={['overflow-hidden rounded-md bg-[#f7f3ec]', compact ? 'aspect-square' : 'aspect-square']}>
-	{image ? (
+	{item.imageUrl ? (
+		<img
+			alt={alt}
+			class="h-full w-full object-cover transition duration-300 group-hover/card:scale-[1.03]"
+			decoding="async"
+			loading={priority ? 'eager' : 'lazy'}
+			src={item.imageUrl}
+		/>
+	) : image ? (
 		<Image
 			alt={alt}
 			class="h-full w-full object-cover transition duration-300 group-hover/card:scale-[1.03]"

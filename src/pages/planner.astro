@@ -6,8 +6,9 @@ import ProductNav from '../components/layout/ProductNav.astro';
 import EventCard from '../components/wardrobe/EventCard.astro';
 import OutfitCard from '../components/wardrobe/OutfitCard.astro';
 import SuggestionCard from '../components/wardrobe/SuggestionCard.astro';
-import { events, outfits, suggestions, wardrobeItems } from '../data/wardrobe';
+import { getWardrobeViewData } from '../lib/wardrobeData';
 
+const { events, outfits, suggestions, wardrobeItems } = await getWardrobeViewData();
 const days = ['10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21'];
 ---
 

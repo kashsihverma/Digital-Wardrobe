@@ -5,7 +5,9 @@ import AppShell from '../components/layout/AppShell.astro';
 import ProductNav from '../components/layout/ProductNav.astro';
 import StatCard from '../components/wardrobe/StatCard.astro';
 import SuggestionCard from '../components/wardrobe/SuggestionCard.astro';
-import { insights, suggestions } from '../data/wardrobe';
+import { getWardrobeViewData } from '../lib/wardrobeData';
+
+const { insights, suggestions } = await getWardrobeViewData();
 
 const panels = [
 	[Archive, 'Declutter queue', '11 pieces are under threshold; 4 have duplicate coverage.'],

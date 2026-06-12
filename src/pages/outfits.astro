@@ -7,8 +7,9 @@ import ItemCard from '../components/wardrobe/ItemCard.astro';
 import ItemPhoto from '../components/wardrobe/ItemPhoto.astro';
 import OutfitCard from '../components/wardrobe/OutfitCard.astro';
 import SuggestionCard from '../components/wardrobe/SuggestionCard.astro';
-import { outfits, suggestions, wardrobeItems } from '../data/wardrobe';
+import { getWardrobeViewData } from '../lib/wardrobeData';
 
+const { outfits, suggestions, wardrobeItems } = await getWardrobeViewData();
 const canvasItems = outfits[0].items.map((id) => wardrobeItems.find((item) => item.id === id)).filter(Boolean);
 ---
 

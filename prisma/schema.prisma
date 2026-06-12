@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String         @id @default(cuid())
+  firebaseUid String?        @unique
+  email       String         @unique
+  name        String?
+  imageUrl    String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  items       WardrobeItem[]
+  outfits     Outfit[]
+  events      EventPlan[]
+  suggestions Suggestion[]
+  insights    InsightMetric[]
+}
+
+model WardrobeItem {
+  id          String            @id @default(cuid())
+  slug        String
+  name        String
+  type        String
+  subcategory String
+  color       String
+  season      String
+  occasion    String
+  brand       String
+  notes       String
+  imageUrl    String?
+  wears       Int               @default(0)
+  lastWorn    String
+  status      WardrobeStatus    @default(READY)
+  tone        WardrobeTone
+  shape       WardrobeShape
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  userId      String
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  outfitLinks OutfitItem[]
+
+  @@unique([userId, slug])
+  @@index([userId, status])
+  @@index([userId, occasion])
+}
+
+model Outfit {
+  id        String       @id @default(cuid())
+  slug      String
+  name      String
+  occasion  String
+  weather   String
+  reason    String
+  status    OutfitStatus @default(DRAFT)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     OutfitItem[]
+  events    EventPlan[]
+
+  @@unique([userId, slug])
+  @@index([userId, status])
+}
+
+model OutfitItem {
+  outfitId String
+  itemId   String
+  position Int
+  outfit   Outfit       @relation(fields: [outfitId], references: [id], onDelete: Cascade)
+  item     WardrobeItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@id([outfitId, itemId])
+  @@index([itemId])
+}
+
+model EventPlan {
+  id        String      @id @default(cuid())
+  slug      String
+  date      String
+  title     String
+  dressCode String
+  weather   String
+  status    EventStatus @default(NEEDS_OUTFIT)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  outfitId  String?
+  outfit    Outfit?     @relation(fields: [outfitId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, slug])
+  @@index([userId, status])
+}
+
+model Suggestion {
+  id        String   @id @default(cuid())
+  title     String
+  reason    String
+  tag       String
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, tag])
+}
+
+model InsightMetric {
+  id        String   @id @default(cuid())
+  label     String
+  value     String
+  detail    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, label])
+}
+
+enum WardrobeStatus {
+  READY     @map("ready")
+  REVIEW    @map("review")
+  UNDERUSED @map("underused")
+  FAVORITE  @map("favorite")
+}
+
+enum WardrobeTone {
+  SAND  @map("sand")
+  SAGE  @map("sage")
+  BERRY @map("berry")
+  INK   @map("ink")
+  CREAM @map("cream")
+  STONE @map("stone")
+}
+
+enum WardrobeShape {
+  JACKET  @map("jacket")
+  TOP     @map("top")
+  DRESS   @map("dress")
+  TROUSER @map("trouser")
+  SKIRT   @map("skirt")
+  SHOE    @map("shoe")
+  BAG     @map("bag")
+}
+
+enum OutfitStatus {
+  PLANNED @map("planned")
+  DRAFT   @map("draft")
+  WORN    @map("worn")
+}
+
+enum EventStatus {
+  PLANNED         @map("planned")
+  NEEDS_OUTFIT    @map("needs-outfit")
+  ALTERNATE_READY @map("alternate-ready")
+}

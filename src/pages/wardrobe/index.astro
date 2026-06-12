@@ -6,7 +6,10 @@ import FilterChips from '../../components/wardrobe/FilterChips.astro';
 import ItemCard from '../../components/wardrobe/ItemCard.astro';
 import SearchBox from '../../components/wardrobe/SearchBox.astro';
 import StatCard from '../../components/wardrobe/StatCard.astro';
-import { filterGroups, insights, wardrobeItems } from '../../data/wardrobe';
+import { filterGroups } from '../../data/wardrobe';
+import { getWardrobeViewData } from '../../lib/wardrobeData';
+
+const { insights, wardrobeItems } = await getWardrobeViewData();
 ---
 
 <Layout title="Wardrobe | Digital Wardrobe">
