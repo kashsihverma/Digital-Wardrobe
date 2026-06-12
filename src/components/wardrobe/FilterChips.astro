@@ -1,0 +1,76 @@
+---
+const { groups = [] } = Astro.props;
+---
+
+<filter-chips class="grid gap-2" data-filter-chips>
+	{groups.map((group) => (
+		<div class="flex gap-2 overflow-x-auto pb-1">
+			{group.map((chip, index) => (
+				<button
+					aria-pressed={index === 0 ? 'true' : 'false'}
+					class:list={[
+						'min-h-9 whitespace-nowrap rounded-full border px-3 text-sm transition',
+						index === 0
+							? 'border-ink bg-ink text-white'
+							: 'border-hairline bg-canvas text-body hover:bg-canvas-soft hover:text-ink',
+					]}
+					data-filter-chip={chip}
+					type="button"
+				>
+					{chip}
+				</button>
+			))}
+		</div>
+	))}
+</filter-chips>
+
+<script>
+	class FilterChipsElement extends HTMLElement {
+		connectedCallback() {
+			this.querySelectorAll<HTMLButtonElement>('[data-filter-chip]').forEach((button) => {
+				button.addEventListener('click', () => {
+					const row = button.parentElement;
+					if (!row) return;
+					const isAll = button.dataset.filterChip === 'All';
+
+					row.querySelectorAll<HTMLButtonElement>('[data-filter-chip]').forEach((chip) => {
+						if (isAll) {
+							chip.setAttribute('aria-pressed', chip === button ? 'true' : 'false');
+							return;
+						}
+
+						if (chip.dataset.filterChip === 'All') {
+							chip.setAttribute('aria-pressed', 'false');
+						}
+					});
+
+					if (!isAll) {
+						const nextState = button.getAttribute('aria-pressed') !== 'true';
+						button.setAttribute('aria-pressed', String(nextState));
+						const hasActive = [...row.querySelectorAll<HTMLButtonElement>('[data-filter-chip]')].some(
+							(chip) => chip.dataset.filterChip !== 'All' && chip.getAttribute('aria-pressed') === 'true',
+						);
+						if (!hasActive) {
+							row.querySelector<HTMLButtonElement>('[data-filter-chip="All"]')?.setAttribute('aria-pressed', 'true');
+						}
+					}
+
+					const selected = [...this.querySelectorAll<HTMLButtonElement>('[data-filter-chip][aria-pressed="true"]')]
+						.map((chip) => chip.dataset.filterChip || '')
+						.filter((chip) => chip && chip !== 'All');
+
+					window.dispatchEvent(new CustomEvent('dw:filters-changed', { detail: { selected } }));
+					window.dispatchEvent(
+						new CustomEvent('dw:toast', {
+							detail: { message: selected.length ? `Filtered by ${selected.join(', ')}.` : 'Showing all wardrobe items.' },
+						}),
+					);
+				});
+			});
+		}
+	}
+
+	if (!customElements.get('filter-chips')) {
+		customElements.define('filter-chips', FilterChipsElement);
+	}
+</script>

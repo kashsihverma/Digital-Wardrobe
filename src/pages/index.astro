@@ -1,7 +1,164 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { Image } from 'astro:assets';
+import { ArrowRight, CalendarDays, CheckCircle2, LockKeyhole, Sparkles, Upload, WandSparkles } from '@lucide/astro';
+import heroImage from '../assets/wardrobe/digital-wardrobe-hero-v2.png';
+import AppShell from '../components/layout/AppShell.astro';
+import SectionHeader from '../components/sections/SectionHeader.astro';
+import EventCard from '../components/wardrobe/EventCard.astro';
+import ItemCard from '../components/wardrobe/ItemCard.astro';
+import OutfitCard from '../components/wardrobe/OutfitCard.astro';
+import StatCard from '../components/wardrobe/StatCard.astro';
+import SuggestionCard from '../components/wardrobe/SuggestionCard.astro';
+import { events, insights, outfits, suggestions, wardrobeItems } from '../data/wardrobe';
+import { itemImages } from '../lib/itemImages';
+
+const heroStripItems = ['camel-blazer', 'ivory-knit', 'sage-overshirt', 'structured-tote'];
 ---
 
-<Layout>
-	<main></main>
+<Layout title="Digital Wardrobe | Private outfit planning and wardrobe intelligence">
+	<AppShell active="/">
+		<section class="relative overflow-hidden bg-canvas">
+			<div class="container-page relative grid min-h-[640px] items-center gap-10 py-10 lg:min-h-[720px] lg:grid-cols-[0.9fr_1.1fr] lg:py-12">
+				<div class="max-w-2xl">
+					<p class="inline-flex rounded-full border border-hairline bg-canvas/80 px-3 py-1.5 font-mono text-xs text-body shadow-[var(--shadow-hairline)]">
+						PRIVATE WARDROBE OS
+					</p>
+					<h1 class="mt-6 text-5xl font-semibold leading-[52px] text-ink md:text-6xl md:leading-[64px]">
+						Plan what to wear from everything you already own.
+					</h1>
+					<p class="mt-6 max-w-xl text-lg leading-8 text-body">
+						Digital Wardrobe turns closet photos into a searchable wardrobe, outfit canvas, event planner, and closet-health system that stays private by default.
+					</p>
+					<div class="mt-8 flex flex-wrap gap-3">
+						<a class="inline-flex min-h-12 items-center gap-2 rounded-full bg-ink px-5 text-base font-medium text-white transition hover:bg-ink/90" href="/wardrobe">
+							Open wardrobe
+							<ArrowRight size={17} strokeWidth={1.8} />
+						</a>
+						<a class="inline-flex min-h-12 items-center gap-2 rounded-full border border-hairline bg-canvas px-5 text-base font-medium text-ink shadow-[var(--shadow-hairline)] transition hover:bg-canvas-soft" href="/outfits">
+							Build outfit
+						</a>
+					</div>
+					<div class="mt-8 grid max-w-xl gap-3 sm:grid-cols-3">
+						{[
+							['86', 'items digitized'],
+							['24', 'outfits saved'],
+							['11', 'underused pieces'],
+						].map(([value, label]) => (
+							<div class="rounded-lg border border-hairline bg-canvas/80 p-4 shadow-[var(--shadow-card)] backdrop-blur">
+								<p class="text-2xl font-semibold text-ink">{value}</p>
+								<p class="mt-1 text-sm text-body">{label}</p>
+							</div>
+						))}
+					</div>
+				</div>
+				<div class="relative">
+					<div class="mb-3 grid grid-cols-4 gap-2">
+						{heroStripItems.map((itemId) => {
+							const item = wardrobeItems.find((candidate) => candidate.id === itemId);
+							const image = itemImages[itemId];
+
+							return image && item ? (
+								<div class="overflow-hidden rounded-md border border-hairline bg-canvas shadow-[var(--shadow-card)]">
+									<Image
+										alt={`${item.name} product photo`}
+										class="aspect-[4/3] w-full object-cover"
+										loading="eager"
+										sizes="(min-width: 1024px) 180px, 25vw"
+										src={image}
+										widths={[120, 180, 240, 320]}
+									/>
+								</div>
+							) : null;
+						})}
+					</div>
+					<div class="rounded-lg border border-hairline bg-canvas p-2 shadow-[var(--shadow-float)]">
+						<Image
+							alt="Tablet and phone showing a clean Digital Wardrobe interface with garment cards, outfit planning, and calendar panels"
+							class="aspect-[16/9] w-full rounded-lg object-cover"
+							loading="eager"
+							src={heroImage}
+						/>
+					</div>
+					<div class="absolute -bottom-6 left-6 right-6 hidden rounded-lg border border-hairline bg-canvas p-4 shadow-[var(--shadow-float)] md:block">
+						<div class="flex items-center gap-3">
+							<div class="flex size-10 items-center justify-center rounded-full bg-ink text-white">
+								<WandSparkles size={16} strokeWidth={1.8} />
+							</div>
+							<div>
+								<p class="text-sm font-medium text-ink">Suggested for Friday.</p>
+								<p class="text-sm text-body">Camel blazer, ivory knit, cream trouser.</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section class="border-y border-hairline bg-canvas-soft py-16">
+			<div class="container-page">
+				<SectionHeader
+					eyebrow="Product system"
+					title="Capture, organize, search, outfit, plan."
+					body="The site follows the blueprint's phased flow: quick item ingestion, confidence-aware tags, visual inventory, outfit composition, event planning, discovery, and insight loops."
+				/>
+				<div class="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+					{[
+						[Upload, 'Capture', 'Camera, upload, screenshot, or link import with one-screen confirmation.'],
+						[CheckCircle2, 'Auto-tag', 'Category, color, occasion, season, and notes stay editable.'],
+						[Sparkles, 'Style', 'Item, event, and closet-health suggestions explain why they appear.'],
+						[CalendarDays, 'Plan', 'Manual events ship first; calendar sync remains an upgrade path.'],
+						[LockKeyhole, 'Privacy', 'Wardrobe, tags, events, and shares start private by default.'],
+					].map(([Icon, title, body]) => (
+						<article class="rounded-lg border border-hairline bg-canvas p-5 shadow-[var(--shadow-card)]">
+							<div class="flex size-10 items-center justify-center rounded-full bg-canvas-soft text-ink">
+								<Icon size={18} strokeWidth={1.8} />
+							</div>
+							<h3 class="mt-5 text-lg font-semibold text-ink">{title}</h3>
+							<p class="mt-2 text-sm leading-6 text-body">{body}</p>
+						</article>
+					))}
+				</div>
+			</div>
+		</section>
+
+		<section class="bg-canvas py-20">
+			<div class="container-page grid gap-8 lg:grid-cols-[0.85fr_1.15fr]">
+				<div>
+					<SectionHeader
+						eyebrow="Today"
+						title="A dashboard that starts with the next decision."
+						body="Weather, events, recent uploads, and wardrobe health sit in one calm command center instead of a cluttered closet dump."
+					/>
+					<div class="mt-8 grid gap-4">
+						{suggestions.map((suggestion) => <SuggestionCard suggestion={suggestion} />)}
+					</div>
+				</div>
+				<div class="grid gap-4">
+					<div class="grid gap-4 sm:grid-cols-2">
+						{insights.slice(0, 2).map((metric) => <StatCard {...metric} />)}
+					</div>
+					<EventCard event={events[0]} />
+					<OutfitCard outfit={outfits[0]} items={wardrobeItems} />
+				</div>
+			</div>
+		</section>
+
+		<section class="bg-ink py-20 text-white">
+			<div class="container-page grid gap-10 lg:grid-cols-[0.85fr_1.15fr]">
+				<div>
+					<p class="font-mono text-xs text-white/60">WARDROBE GRID</p>
+					<h2 class="mt-3 text-3xl font-semibold leading-10 md:text-[32px]">
+						Image-first browsing without ecommerce noise.
+					</h2>
+					<p class="mt-4 text-base leading-7 text-white/70">
+						Item cards prioritize cutouts, tags, wear count, tag confidence, and status markers. Discovery can become richer; inventory stays clean.
+					</p>
+				</div>
+				<div class="grid grid-cols-2 gap-3 md:grid-cols-3">
+					{wardrobeItems.slice(0, 6).map((item) => <ItemCard item={item} />)}
+				</div>
+			</div>
+		</section>
+	</AppShell>
 </Layout>

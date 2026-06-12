@@ -1,0 +1,18 @@
+---
+import { productNav } from '../../data/wardrobe';
+const { active = '/' } = Astro.props;
+---
+
+<nav class="container-page -mt-2 flex gap-2 overflow-x-auto pb-4 pt-2 text-sm" aria-label="Product sections">
+	{productNav.map((item) => (
+		<a
+			class:list={[
+				'whitespace-nowrap rounded-full border border-hairline bg-canvas px-4 py-2 text-body shadow-[var(--shadow-hairline)] transition hover:text-ink',
+				active === item.href && 'bg-ink text-white hover:text-white',
+			]}
+			href={item.href}
+		>
+			{item.label}
+		</a>
+	))}
+</nav>

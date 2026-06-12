@@ -1,0 +1,95 @@
+---
+import { CalendarDays, Plus } from '@lucide/astro';
+import Layout from '../layouts/Layout.astro';
+import AppShell from '../components/layout/AppShell.astro';
+import ProductNav from '../components/layout/ProductNav.astro';
+import EventCard from '../components/wardrobe/EventCard.astro';
+import OutfitCard from '../components/wardrobe/OutfitCard.astro';
+import SuggestionCard from '../components/wardrobe/SuggestionCard.astro';
+import { events, outfits, suggestions, wardrobeItems } from '../data/wardrobe';
+
+const days = ['10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21'];
+---
+
+<Layout title="Planner | Digital Wardrobe">
+	<AppShell active="/planner">
+		<section class="bg-canvas-soft py-8">
+			<ProductNav active="/planner" />
+			<div class="container-page grid gap-6 lg:grid-cols-[1fr_380px]">
+				<section class="rounded-lg border border-hairline bg-canvas p-5 shadow-[var(--shadow-card)]">
+					<div class="flex flex-wrap items-center justify-between gap-4">
+						<div>
+							<p class="font-mono text-xs text-body">JUNE PLANNER</p>
+							<h1 class="mt-2 text-3xl font-semibold text-ink">Manual events first, calendar sync later.</h1>
+						</div>
+						<button
+							class="inline-flex min-h-10 items-center gap-2 rounded-full bg-ink px-4 text-sm font-medium text-white"
+							data-open-panel="#planner-event-panel"
+							data-toast="Event planner opened."
+							data-track="event_created_opened"
+							type="button"
+						>
+							<Plus size={15} strokeWidth={1.8} />
+							Plan event
+						</button>
+					</div>
+					<div class="mt-5 rounded-lg border border-hairline bg-canvas-soft p-4" hidden id="planner-event-panel">
+						<div class="flex items-start justify-between gap-4">
+							<div>
+								<p class="font-mono text-xs text-body">NEW EVENT</p>
+								<h2 class="mt-1 text-lg font-semibold text-ink">Plan an outfit for a manual event.</h2>
+							</div>
+							<button class="rounded-full border border-hairline px-3 py-1 text-sm text-body" data-close-panel="#planner-event-panel" type="button">Close</button>
+						</div>
+						<div class="mt-4 grid gap-3 md:grid-cols-4">
+							<label class="grid gap-1 text-sm text-body">
+								Event
+								<input class="min-h-10 rounded-lg border border-hairline bg-canvas px-3 text-ink" value="Gallery opening" />
+							</label>
+							<label class="grid gap-1 text-sm text-body">
+								Date
+								<input class="min-h-10 rounded-lg border border-hairline bg-canvas px-3 text-ink" type="date" />
+							</label>
+							<label class="grid gap-1 text-sm text-body">
+								Dress code
+								<select class="min-h-10 rounded-lg border border-hairline bg-canvas px-3 text-ink">
+									<option>Polished casual</option>
+									<option>Dinner</option>
+									<option>Travel</option>
+								</select>
+							</label>
+							<button class="mt-6 min-h-10 rounded-full bg-ink px-4 text-sm font-medium text-white md:mt-auto" data-toast="Event saved with two outfit suggestions." data-track="event_created" type="button">Save event</button>
+						</div>
+					</div>
+					<div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+						{days.map((day) => (
+							<div class:list={['min-h-28 rounded-lg border border-hairline bg-canvas-soft p-3', ['14', '15', '17'].includes(day) && 'bg-canvas shadow-[var(--shadow-card)]']}>
+								<p class="font-mono text-xs text-body">Jun {day}</p>
+								{day === '14' && <p class="mt-4 text-sm font-medium text-ink">Client review</p>}
+								{day === '15' && <p class="mt-4 text-sm font-medium text-ink">Dinner</p>}
+								{day === '17' && <p class="mt-4 text-sm font-medium text-ink">Flight</p>}
+							</div>
+						))}
+					</div>
+				</section>
+
+				<aside class="grid content-start gap-4">
+					<div class="rounded-lg border border-hairline bg-ink p-5 text-white shadow-[var(--shadow-float)]">
+						<div class="flex items-center gap-3">
+							<div class="flex size-10 items-center justify-center rounded-full bg-white text-ink">
+								<CalendarDays size={16} strokeWidth={1.8} />
+							</div>
+							<div>
+								<p class="text-sm font-medium">Next decision</p>
+								<p class="text-sm text-white/70">Friday review, 26 C, polished casual.</p>
+							</div>
+						</div>
+					</div>
+					{events.map((event) => <EventCard event={event} />)}
+					<OutfitCard outfit={outfits[2]} items={wardrobeItems} />
+					<SuggestionCard suggestion={suggestions[1]} />
+				</aside>
+			</div>
+		</section>
+	</AppShell>
+</Layout>

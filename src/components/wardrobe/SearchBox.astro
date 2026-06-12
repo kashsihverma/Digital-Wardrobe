@@ -1,0 +1,95 @@
+---
+import { Search, SlidersHorizontal } from '@lucide/astro';
+const { placeholder = 'Search items, outfits, events, and ideas' } = Astro.props;
+---
+
+<search-box class="relative block" data-search-box>
+	<form class="flex min-h-12 items-center gap-3 rounded-lg border border-hairline bg-canvas px-3 shadow-[var(--shadow-hairline)]" role="search">
+		<label class="sr-only" for="wardrobe-search">Search wardrobe</label>
+		<Search class="text-body" size={18} strokeWidth={1.8} />
+		<input
+			aria-autocomplete="list"
+			aria-controls="wardrobe-search-suggestions"
+			aria-expanded="false"
+			class="min-w-0 flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-mute"
+			data-search-input
+			id="wardrobe-search"
+			name="q"
+			placeholder={placeholder}
+			role="combobox"
+			type="search"
+		/>
+		<button
+			class="flex size-9 items-center justify-center rounded-full border border-hairline text-body transition hover:bg-canvas-soft hover:text-ink"
+			data-toast="Filters are available below the search bar."
+			type="button"
+			aria-label="Open filters"
+		>
+			<SlidersHorizontal size={16} strokeWidth={1.8} />
+		</button>
+	</form>
+	<div
+		class="absolute left-0 right-0 top-[calc(100%+8px)] z-30 hidden rounded-lg border border-hairline bg-canvas p-2 shadow-[var(--shadow-float)]"
+		data-search-suggestions
+		id="wardrobe-search-suggestions"
+		role="listbox"
+	></div>
+</search-box>
+
+<script>
+	const defaultSuggestions = [
+		'camel blazer',
+		'date night',
+		'underused neutrals',
+		'summer workwear',
+		'travel capsule',
+		'black dress',
+	];
+
+	class SearchBoxElement extends HTMLElement {
+		connectedCallback() {
+			const input = this.querySelector<HTMLInputElement>('[data-search-input]');
+			const panel = this.querySelector<HTMLElement>('[data-search-suggestions]');
+			if (!input || !panel) return;
+
+			const renderSuggestions = () => {
+				const query = input.value.trim().toLowerCase();
+				const candidates = defaultSuggestions.filter((item) => !query || item.includes(query)).slice(0, 5);
+				panel.innerHTML = candidates
+					.map(
+						(item) =>
+							`<button class="block w-full rounded-lg px-3 py-2 text-left text-sm text-body hover:bg-canvas-soft hover:text-ink" role="option" type="button" data-suggestion="${item}">${item}</button>`,
+					)
+					.join('');
+				panel.classList.toggle('hidden', candidates.length === 0 || document.activeElement !== input);
+				input.setAttribute('aria-expanded', String(!panel.classList.contains('hidden')));
+			};
+
+			input.addEventListener('input', () => {
+				window.dispatchEvent(new CustomEvent('dw:search-changed', { detail: { query: input.value } }));
+				renderSuggestions();
+			});
+
+			input.addEventListener('focus', renderSuggestions);
+			input.addEventListener('blur', () => {
+				window.setTimeout(() => {
+					panel.classList.add('hidden');
+					input.setAttribute('aria-expanded', 'false');
+				}, 120);
+			});
+
+			panel.addEventListener('click', (event) => {
+				const option = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-suggestion]');
+				if (!option) return;
+				input.value = option.dataset.suggestion || '';
+				window.dispatchEvent(new CustomEvent('dw:search-changed', { detail: { query: input.value } }));
+				window.dispatchEvent(new CustomEvent('dw:toast', { detail: { message: `Searching for ${input.value}.` } }));
+				panel.classList.add('hidden');
+			});
+		}
+	}
+
+	if (!customElements.get('search-box')) {
+		customElements.define('search-box', SearchBoxElement);
+	}
+</script>

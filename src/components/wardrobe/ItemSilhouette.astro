@@ -1,0 +1,62 @@
+---
+import type { WardrobeItem } from '../../data/wardrobe';
+
+const { item, compact = false } = Astro.props as { item: WardrobeItem; compact?: boolean };
+const toneClass = {
+	sand: 'from-[#d5b894] to-[#a9815a]',
+	sage: 'from-[#9aa98f] to-[#66745e]',
+	berry: 'from-[#b84a62] to-[#6f2736]',
+	ink: 'from-[#202020] to-[#050505]',
+	cream: 'from-[#fbf4e6] to-[#d7c8ad]',
+	stone: 'from-[#a79b88] to-[#6f6253]',
+}[item.tone];
+---
+
+<div class:list={['relative mx-auto flex items-center justify-center', compact ? 'h-24 w-24' : 'h-40 w-full']}>
+	<div class="absolute inset-x-6 bottom-2 h-4 rounded-full bg-black/5 blur-md"></div>
+	{item.shape === 'jacket' && (
+		<div class:list={['relative h-28 w-24 rounded-t-2xl bg-gradient-to-br shadow-sm', toneClass]}>
+			<div class="absolute left-1/2 top-0 h-full w-5 -translate-x-1/2 bg-white/45"></div>
+			<div class="absolute left-4 top-4 h-16 w-px rotate-[-10deg] bg-white/55"></div>
+			<div class="absolute right-4 top-4 h-16 w-px rotate-[10deg] bg-black/10"></div>
+		</div>
+	)}
+	{item.shape === 'top' && (
+		<div class:list={['relative h-24 w-28 rounded-t-3xl bg-gradient-to-br shadow-sm', toneClass]}>
+			<div class="absolute -left-5 top-3 h-16 w-8 rotate-12 rounded-full bg-inherit"></div>
+			<div class="absolute -right-5 top-3 h-16 w-8 -rotate-12 rounded-full bg-inherit"></div>
+			<div class="absolute left-1/2 top-0 h-6 w-10 -translate-x-1/2 rounded-b-full bg-white/50"></div>
+		</div>
+	)}
+	{item.shape === 'dress' && (
+		<div class:list={['relative h-32 w-24 rounded-t-3xl bg-gradient-to-br shadow-sm', toneClass]}>
+			<div class="absolute left-1/2 top-0 h-8 w-10 -translate-x-1/2 rounded-b-full bg-white/35"></div>
+			<div class="absolute -bottom-1 left-1/2 h-16 w-32 -translate-x-1/2 rounded-t-[70%] bg-inherit"></div>
+		</div>
+	)}
+	{item.shape === 'trouser' && (
+		<div class="relative h-32 w-24">
+			<div class:list={['absolute left-2 top-0 h-full w-9 rounded-b-2xl bg-gradient-to-br shadow-sm', toneClass]}></div>
+			<div class:list={['absolute right-2 top-0 h-full w-9 rounded-b-2xl bg-gradient-to-br shadow-sm', toneClass]}></div>
+			<div class="absolute left-1/2 top-0 h-5 w-20 -translate-x-1/2 rounded-t-lg bg-black/10"></div>
+		</div>
+	)}
+	{item.shape === 'skirt' && (
+		<div class:list={['relative h-28 w-32 rounded-t-xl bg-gradient-to-br shadow-sm [clip-path:polygon(35%_0,65%_0,92%_100%,8%_100%)]', toneClass]}>
+			<div class="absolute left-1/2 top-0 h-full w-px bg-white/40"></div>
+			<div class="absolute left-10 top-0 h-full w-px bg-black/10"></div>
+			<div class="absolute right-10 top-0 h-full w-px bg-black/10"></div>
+		</div>
+	)}
+	{item.shape === 'shoe' && (
+		<div class="relative h-24 w-32">
+			<div class:list={['absolute bottom-7 left-5 h-9 w-20 rounded-full bg-gradient-to-br shadow-sm', toneClass]}></div>
+			<div class:list={['absolute bottom-3 right-3 h-9 w-20 rounded-full bg-gradient-to-br shadow-sm', toneClass]}></div>
+		</div>
+	)}
+	{item.shape === 'bag' && (
+		<div class:list={['relative h-24 w-28 rounded-2xl bg-gradient-to-br shadow-sm', toneClass]}>
+			<div class="absolute left-1/2 top-[-24px] h-12 w-16 -translate-x-1/2 rounded-t-full border-4 border-current border-b-0 text-black/20"></div>
+		</div>
+	)}
+</div>

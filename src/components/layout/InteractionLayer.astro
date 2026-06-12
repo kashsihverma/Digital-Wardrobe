@@ -1,0 +1,84 @@
+<div
+	id="dw-toast-region"
+	class="fixed right-4 top-20 z-[80] grid w-[min(calc(100vw-32px),360px)] gap-2"
+	aria-live="polite"
+	aria-atomic="true"
+></div>
+
+<script>
+	type ToastDetail = {
+		message?: string;
+	};
+
+	type AnalyticsEvent = {
+		name: string;
+		label: string;
+		at: string;
+	};
+
+	const toastRegion = document.getElementById('dw-toast-region');
+
+	const storeEvent = (name: string, label: string) => {
+		const key = 'digital-wardrobe-events';
+		const current = JSON.parse(localStorage.getItem(key) || '[]') as AnalyticsEvent[];
+		current.unshift({ name, label, at: new Date().toISOString() });
+		localStorage.setItem(key, JSON.stringify(current.slice(0, 25)));
+	};
+
+	const showToast = (message: string) => {
+		if (!toastRegion) return;
+
+		const toast = document.createElement('div');
+		toast.className =
+			'rounded-lg border border-hairline bg-canvas px-4 py-3 text-sm text-ink shadow-[var(--shadow-float)]';
+		toast.textContent = message;
+		toastRegion.prepend(toast);
+		window.setTimeout(() => {
+			toast.style.opacity = '0';
+			toast.style.transform = 'translateY(-4px)';
+			toast.style.transition = 'opacity 160ms ease, transform 160ms ease';
+			window.setTimeout(() => toast.remove(), 180);
+		}, 2600);
+	};
+
+	window.addEventListener('dw:toast', (event) => {
+		const detail = (event as CustomEvent<ToastDetail>).detail;
+		showToast(detail?.message || 'Saved.');
+	});
+
+	Object.assign(window, { dwToast: showToast });
+
+	document.addEventListener('click', async (event) => {
+		const trigger = (event.target as HTMLElement).closest<HTMLElement>(
+			'[data-toast], [data-track], [data-open-panel], [data-close-panel], [data-copy-text]',
+		);
+		if (!trigger) return;
+
+		const label = trigger.dataset.track || trigger.textContent?.trim() || 'interaction';
+		if (trigger.dataset.track) {
+			storeEvent(trigger.dataset.track, label);
+		}
+
+		if (trigger.dataset.copyText) {
+			try {
+				await navigator.clipboard.writeText(trigger.dataset.copyText);
+				showToast(trigger.dataset.toast || 'Copied to clipboard.');
+			} catch {
+				showToast('Copy was blocked by the browser.');
+			}
+			return;
+		}
+
+		if (trigger.dataset.openPanel) {
+			document.querySelector<HTMLElement>(trigger.dataset.openPanel)?.removeAttribute('hidden');
+		}
+
+		if (trigger.dataset.closePanel) {
+			document.querySelector<HTMLElement>(trigger.dataset.closePanel)?.setAttribute('hidden', 'true');
+		}
+
+		if (trigger.dataset.toast) {
+			showToast(trigger.dataset.toast);
+		}
+	});
+</script>

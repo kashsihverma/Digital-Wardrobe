@@ -1,0 +1,37 @@
+---
+import { Image } from 'astro:assets';
+import type { WardrobeItem } from '../../data/wardrobe';
+import { itemImages } from '../../lib/itemImages';
+import ItemSilhouette from './ItemSilhouette.astro';
+
+const {
+	item,
+	compact = false,
+	priority = false,
+} = Astro.props as {
+	item: WardrobeItem;
+	compact?: boolean;
+	priority?: boolean;
+};
+
+const image = itemImages[item.id];
+const alt = `${item.name} product photo`;
+---
+
+<div class:list={['overflow-hidden rounded-md bg-[#f7f3ec]', compact ? 'aspect-square' : 'aspect-square']}>
+	{image ? (
+		<Image
+			alt={alt}
+			class="h-full w-full object-cover transition duration-300 group-hover/card:scale-[1.03]"
+			decoding="async"
+			loading={priority ? 'eager' : 'lazy'}
+			sizes={compact ? '96px' : '(min-width: 1024px) 240px, 45vw'}
+			src={image}
+			widths={[96, 160, 240, 320, 480, 640]}
+		/>
+	) : (
+		<div class:list={['grid h-full place-items-center p-3', compact ? 'p-2' : 'p-4']}>
+			<ItemSilhouette item={item} compact={compact} />
+		</div>
+	)}
+</div>

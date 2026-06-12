@@ -1,0 +1,92 @@
+---
+import { Bell, CreditCard, Download, LockKeyhole, Plug, UserRound } from '@lucide/astro';
+import Layout from '../layouts/Layout.astro';
+import AppShell from '../components/layout/AppShell.astro';
+import ProductNav from '../components/layout/ProductNav.astro';
+
+const settings = [
+	[UserRound, 'Profile', 'Name, style preferences, size notes, and default location.'],
+	[LockKeyhole, 'Privacy', 'Private wardrobe, private tags, explicit share controls.'],
+	[Plug, 'Connected apps', 'Calendar, weather, storage, and future commerce imports.'],
+	[Bell, 'Notifications', 'Event reminders, tag-review nudges, and capsule prompts.'],
+	[Download, 'Export', 'Wardrobe archive, outfit images, and usage history.'],
+	[CreditCard, 'Billing', 'Premium suggestions, analytics, and stylist add-ons.'],
+];
+---
+
+<Layout title="Settings and Privacy | Digital Wardrobe">
+	<AppShell active="/settings">
+		<section class="bg-canvas-soft py-8">
+			<ProductNav active="/settings" />
+			<div class="container-page grid gap-6 lg:grid-cols-[0.75fr_1.25fr]">
+				<aside class="rounded-lg border border-hairline bg-ink p-6 text-white shadow-[var(--shadow-float)]">
+					<p class="font-mono text-xs text-white/60">TRUST POSTURE</p>
+					<h1 class="mt-3 text-3xl font-semibold leading-10">Private by default, explicit by design.</h1>
+					<p class="mt-4 text-base leading-7 text-white/70">
+						Closet photos, tags, events, and planner context stay personal unless a user chooses a share card, link, or collaborator.
+					</p>
+					<div class="mt-6 grid gap-3">
+						{['Wardrobe hidden from public profiles', 'Item tags never shared automatically', 'Share links can be revoked'].map((text) => (
+							<div class="rounded-lg border border-white/10 bg-white/5 p-3 text-sm text-white/80">{text}</div>
+						))}
+					</div>
+				</aside>
+				<section class="grid gap-4 md:grid-cols-2">
+					{settings.map(([Icon, title, body]) => (
+						<article class="rounded-lg border border-hairline bg-canvas p-5 shadow-[var(--shadow-card)]">
+							<div class="flex size-10 items-center justify-center rounded-full bg-canvas-soft text-ink">
+								<Icon size={17} strokeWidth={1.8} />
+							</div>
+							<h2 class="mt-5 text-lg font-semibold text-ink">{title}</h2>
+							<p class="mt-2 text-sm leading-6 text-body">{body}</p>
+							<button
+								class="mt-5 min-h-10 rounded-full border border-hairline px-4 text-sm font-medium text-ink"
+								data-setting-title={title}
+								data-setting-body={body}
+								data-track={`settings_${String(title).toLowerCase().replaceAll(' ', '_')}_opened`}
+								type="button"
+							>
+								Manage
+							</button>
+						</article>
+					))}
+				</section>
+			</div>
+			<div class="container-page mt-6">
+				<section class="rounded-lg border border-hairline bg-canvas p-5 shadow-[var(--shadow-card)]" id="settings-detail">
+					<p class="font-mono text-xs text-body">SELECTED SETTING</p>
+					<h2 class="mt-2 text-xl font-semibold text-ink" data-settings-title>Privacy</h2>
+					<p class="mt-2 text-sm leading-6 text-body" data-settings-body>Private wardrobe, private tags, explicit share controls.</p>
+					<div class="mt-5 grid gap-3 md:grid-cols-3">
+						<label class="flex min-h-12 items-center justify-between rounded-lg border border-hairline bg-canvas-soft px-3 text-sm text-ink">
+							Wardrobe hidden
+							<input checked type="checkbox" />
+						</label>
+						<label class="flex min-h-12 items-center justify-between rounded-lg border border-hairline bg-canvas-soft px-3 text-sm text-ink">
+							Tags private
+							<input checked type="checkbox" />
+						</label>
+						<button class="min-h-12 rounded-lg bg-ink px-4 text-sm font-medium text-white" data-toast="Settings saved locally for this prototype." data-track="settings_saved" type="button">
+							Save preference
+						</button>
+					</div>
+				</section>
+			</div>
+		</section>
+	</AppShell>
+</Layout>
+
+<script>
+	const titleTarget = document.querySelector<HTMLElement>('[data-settings-title]');
+	const bodyTarget = document.querySelector<HTMLElement>('[data-settings-body]');
+
+	document.querySelectorAll<HTMLButtonElement>('[data-setting-title]').forEach((button) => {
+		button.addEventListener('click', () => {
+			const title = button.dataset.settingTitle || 'Settings';
+			if (titleTarget) titleTarget.textContent = title;
+			if (bodyTarget) bodyTarget.textContent = button.dataset.settingBody || '';
+			document.getElementById('settings-detail')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			window.dispatchEvent(new CustomEvent('dw:toast', { detail: { message: `${title} controls opened.` } }));
+		});
+	});
+</script>

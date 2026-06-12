@@ -1,0 +1,120 @@
+---
+import { Search } from '@lucide/astro';
+import Layout from '../layouts/Layout.astro';
+import AppShell from '../components/layout/AppShell.astro';
+import ProductNav from '../components/layout/ProductNav.astro';
+import ItemCard from '../components/wardrobe/ItemCard.astro';
+import OutfitCard from '../components/wardrobe/OutfitCard.astro';
+import SearchBox from '../components/wardrobe/SearchBox.astro';
+import SuggestionCard from '../components/wardrobe/SuggestionCard.astro';
+import { outfits, suggestions, wardrobeItems } from '../data/wardrobe';
+
+const ideas = [
+	{
+		title: 'Date night neutrals',
+		body: 'Black column dress, warm blazer, low shine accessories.',
+		palette: ['#171717', '#c8b59b', '#f5efe4'],
+	},
+	{
+		title: 'Airport capsule',
+		body: 'Sage overshirt, cream knit, wrinkle-safe trouser.',
+		palette: ['#7c8f78', '#f5efe4', '#a79b88'],
+	},
+	{
+		title: 'Summer workwear',
+		body: 'Light bottoms, structured tote, breathable layers.',
+		palette: ['#fbf4e6', '#d7c8ad', '#2e4053'],
+	},
+	{
+		title: 'Underused color story',
+		body: 'Bring berry into a neutral outfit without overbuilding.',
+		palette: ['#b84a62', '#f5efe4', '#171717'],
+	},
+];
+---
+
+<Layout title="Discover | Digital Wardrobe">
+	<AppShell active="/discover">
+		<section class="bg-canvas-soft py-8">
+			<ProductNav active="/discover" />
+			<div class="container-page">
+				<div class="grid gap-6 lg:grid-cols-[1fr_360px]">
+					<section>
+						<div class="rounded-lg border border-hairline bg-canvas p-4 shadow-[var(--shadow-card)]">
+							<SearchBox placeholder="Search date night, sage, underused, summer workwear" />
+							<div class="mt-3 flex gap-2 overflow-x-auto">
+								{['Items', 'Outfits', 'Collections', 'Inspiration'].map((tab, index) => (
+									<button
+										aria-pressed={index === 0 ? 'true' : 'false'}
+										class:list={['min-h-9 whitespace-nowrap rounded-full px-3 text-sm', index === 0 ? 'bg-ink text-white' : 'border border-hairline text-body']}
+										data-discover-tab={tab}
+										type="button"
+									>
+										{tab}
+									</button>
+								))}
+							</div>
+							<p class="mt-3 text-sm text-body" data-discover-status>Showing item-forward discovery results.</p>
+						</div>
+						<div class="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+							{ideas.map((idea, index) => (
+								<article class:list={['rounded-lg border border-hairline bg-canvas p-5 shadow-[var(--shadow-card)]', index === 0 && 'md:row-span-2']}>
+									<div class="grid h-32 grid-cols-3 gap-2 rounded-lg bg-canvas-soft p-3">
+										{idea.palette.map((color, colorIndex) => (
+											<div
+												class:list={['rounded-md border border-white/60 shadow-sm', colorIndex === 1 && 'translate-y-3', colorIndex === 2 && 'translate-y-6']}
+												style={`background:${color}`}
+											></div>
+										))}
+									</div>
+									<p class="mt-4 font-mono text-xs text-body">IDEA</p>
+									<h2 class="mt-2 text-xl font-semibold text-ink">{idea.title}</h2>
+									<p class="mt-2 text-sm leading-6 text-body">{idea.body}</p>
+								</article>
+							))}
+							{wardrobeItems.slice(0, 4).map((item) => <ItemCard item={item} />)}
+						</div>
+					</section>
+
+					<aside class="grid content-start gap-4">
+						<div class="rounded-lg border border-hairline bg-canvas p-5 shadow-[var(--shadow-card)]">
+							<div class="flex items-center gap-3">
+								<div class="flex size-10 items-center justify-center rounded-full bg-ink text-white">
+									<Search size={16} strokeWidth={1.8} />
+								</div>
+								<div>
+									<p class="text-sm font-medium text-ink">Smart empty states</p>
+									<p class="text-sm text-body">Saved searches can become capsule starts.</p>
+								</div>
+							</div>
+						</div>
+						<SuggestionCard suggestion={suggestions[2]} />
+						<OutfitCard outfit={outfits[1]} items={wardrobeItems} />
+					</aside>
+				</div>
+			</div>
+		</section>
+	</AppShell>
+</Layout>
+
+<script>
+	const tabButtons = [...document.querySelectorAll<HTMLButtonElement>('[data-discover-tab]')];
+	const status = document.querySelector<HTMLElement>('[data-discover-status]');
+
+	tabButtons.forEach((button) => {
+		button.addEventListener('click', () => {
+			tabButtons.forEach((tab) => {
+				const active = tab === button;
+				tab.setAttribute('aria-pressed', String(active));
+				tab.classList.toggle('bg-ink', active);
+				tab.classList.toggle('text-white', active);
+				tab.classList.toggle('border', !active);
+				tab.classList.toggle('border-hairline', !active);
+				tab.classList.toggle('text-body', !active);
+			});
+			const tab = button.dataset.discoverTab || 'Items';
+			if (status) status.textContent = `Showing ${tab.toLowerCase()} results with saved-search style suggestions.`;
+			window.dispatchEvent(new CustomEvent('dw:toast', { detail: { message: `${tab} results selected.` } }));
+		});
+	});
+</script>

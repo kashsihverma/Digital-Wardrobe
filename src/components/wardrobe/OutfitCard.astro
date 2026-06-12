@@ -1,0 +1,28 @@
+---
+import type { Outfit, WardrobeItem } from '../../data/wardrobe';
+import ItemPhoto from './ItemPhoto.astro';
+
+const { outfit, items } = Astro.props as { outfit: Outfit; items: WardrobeItem[] };
+const outfitItems = outfit.items.map((id) => items.find((item) => item.id === id)).filter(Boolean) as WardrobeItem[];
+---
+
+<article class="rounded-lg border border-hairline bg-canvas p-4 shadow-[var(--shadow-card)]">
+	<div class="grid grid-cols-3 gap-2 rounded-lg bg-canvas-soft p-3">
+		{outfitItems.slice(0, 5).map((item) => (
+			<div class="group/card rounded-md bg-white p-1 shadow-[var(--shadow-hairline)]">
+				<ItemPhoto item={item} compact />
+			</div>
+		))}
+	</div>
+	<div class="mt-4">
+		<div class="flex items-center justify-between gap-3">
+			<h3 class="text-base font-semibold text-ink">{outfit.name}</h3>
+			<span class="rounded-full bg-canvas-soft px-2 py-1 text-xs text-body">{outfit.status}</span>
+		</div>
+		<p class="mt-2 text-sm leading-6 text-body">{outfit.reason}</p>
+		<div class="mt-4 flex flex-wrap gap-2">
+			<span class="rounded-full border border-hairline bg-canvas px-2 py-1 text-xs text-body">{outfit.occasion}</span>
+			<span class="rounded-full border border-hairline bg-canvas px-2 py-1 text-xs text-body">{outfit.weather}</span>
+		</div>
+	</div>
+</article>

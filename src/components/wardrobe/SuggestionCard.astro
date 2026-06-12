@@ -1,0 +1,35 @@
+---
+import { Sparkles } from '@lucide/astro';
+const { suggestion } = Astro.props;
+---
+
+<article class="rounded-lg border border-hairline bg-canvas p-4 shadow-[var(--shadow-card)]">
+	<div class="flex items-start gap-3">
+		<div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-ink text-white">
+			<Sparkles size={16} strokeWidth={1.8} />
+		</div>
+		<div>
+			<span class="font-mono text-xs text-body">{suggestion.tag}</span>
+			<h3 class="mt-1 text-base font-semibold text-ink">{suggestion.title}</h3>
+			<p class="mt-2 text-sm leading-6 text-body">{suggestion.reason}</p>
+			<div class="mt-4 flex flex-wrap gap-2">
+				<button
+					class="min-h-9 rounded-full bg-ink px-3 text-xs font-medium text-white"
+					data-toast={`Accepted: ${suggestion.title}`}
+					data-track="suggestion_accepted"
+					type="button"
+				>
+					Accept
+				</button>
+				<button
+					class="min-h-9 rounded-full border border-hairline px-3 text-xs font-medium text-body"
+					data-toast={`Dismissed: ${suggestion.title}`}
+					data-track="suggestion_dismissed"
+					type="button"
+				>
+					Dismiss
+				</button>
+			</div>
+		</div>
+	</div>
+</article>

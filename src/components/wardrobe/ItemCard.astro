@@ -1,0 +1,39 @@
+---
+import type { WardrobeItem } from '../../data/wardrobe';
+import ItemPhoto from './ItemPhoto.astro';
+
+const { item, href = `/wardrobe/${item.id}` } = Astro.props as { item: WardrobeItem; href?: string };
+
+const statusLabel = {
+	ready: 'Ready',
+	review: 'Review tags',
+	underused: 'Underused',
+	favorite: 'Favorite',
+}[item.status];
+---
+
+<a
+	class="group/card block rounded-lg border border-hairline bg-canvas p-3 shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-float)]"
+	data-brand={item.brand}
+	data-color={item.color}
+	data-name={item.name}
+	data-occasion={item.occasion}
+	data-season={item.season}
+	data-status={item.status}
+	data-type={item.type}
+	data-wardrobe-card
+	href={href}
+>
+	<ItemPhoto item={item} />
+	<div class="mt-3 min-w-0">
+		<div class="flex items-start justify-between gap-2">
+			<h3 class="truncate text-sm font-medium text-ink">{item.name}</h3>
+			<span class="rounded-full bg-canvas-soft px-2 py-0.5 text-[11px] text-body">{statusLabel}</span>
+		</div>
+		<p class="mt-1 truncate text-xs text-body">{item.type} · {item.color} · {item.occasion}</p>
+		<div class="mt-3 flex items-center justify-between text-xs text-mute">
+			<span>{item.wears} wears</span>
+			<span>{item.lastWorn}</span>
+		</div>
+	</div>
+</a>
