@@ -19,7 +19,7 @@ const related = wardrobeItems.filter((candidate) => candidate.id !== item.id).sl
 ---
 
 <Layout title={`${item.name} | Digital Wardrobe`}>
-	<AppShell active="/wardrobe">
+	<AppShell active="/wardrobe" private>
 		<section class="bg-canvas-soft py-8">
 			<div class="container-page">
 				<a class="inline-flex items-center gap-2 rounded-full border border-hairline bg-canvas px-3 py-2 text-sm text-body shadow-[var(--shadow-hairline)] transition hover:text-ink" href="/wardrobe">

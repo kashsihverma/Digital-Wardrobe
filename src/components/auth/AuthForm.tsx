@@ -40,10 +40,10 @@ function getFriendlyAuthError(error: unknown) {
 }
 
 function getRedirectTarget() {
-  if (typeof window === "undefined") return "/wardrobe"
+  if (typeof window === "undefined") return "/dashboard"
 
   const target = new URLSearchParams(window.location.search).get("redirect")
-  return target?.startsWith("/") ? target : "/wardrobe"
+  return target?.startsWith("/") ? target : "/dashboard"
 }
 
 export function AuthForm() {

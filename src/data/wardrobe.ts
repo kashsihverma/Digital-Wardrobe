@@ -37,7 +37,7 @@ export type EventPlan = {
 };
 
 export const productNav = [
-	{ href: '/', label: 'Today' },
+	{ href: '/dashboard', label: 'Today' },
 	{ href: '/wardrobe', label: 'Wardrobe' },
 	{ href: '/outfits', label: 'Outfits' },
 	{ href: '/planner', label: 'Planner' },

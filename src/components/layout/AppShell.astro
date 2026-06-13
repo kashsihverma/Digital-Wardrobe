@@ -2,22 +2,28 @@
 import SiteFooter from './SiteFooter.astro';
 import SiteHeader from './SiteHeader.astro';
 import InteractionLayer from './InteractionLayer.astro';
+import PrivateAccessGate from '../auth/PrivateAccessGate';
 import { productNav } from '../../data/wardrobe';
 
-const { active = '/' } = Astro.props;
+const { active = '/', private: isPrivate = false } = Astro.props;
 ---
 
 <SiteHeader active={active} />
-<main class="pb-36 lg:pb-0">
+<main class="pb-36 lg:pb-0" data-private-content={isPrivate ? 'true' : undefined}>
 	<slot />
 </main>
 <SiteFooter />
-<div class="pointer-events-none fixed inset-x-0 bottom-0 z-40 h-28 bg-canvas-soft/95 backdrop-blur lg:hidden" aria-hidden="true"></div>
-<nav class="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-50 grid grid-cols-5 rounded-full border border-hairline bg-canvas/95 p-1 text-xs shadow-[var(--shadow-float)] backdrop-blur lg:hidden" aria-label="Mobile primary navigation">
-	{productNav.slice(0, 5).map((item) => (
-		<a class:list={['rounded-full px-2 py-2 text-center text-body', active === item.href && 'bg-ink text-white']} href={item.href}>
-			{item.label}
-		</a>
-	))}
-</nav>
+{isPrivate && <PrivateAccessGate client:load />}
+{isPrivate && (
+	<>
+		<div class="pointer-events-none fixed inset-x-0 bottom-0 z-40 h-28 bg-canvas-soft/95 backdrop-blur lg:hidden" data-private-nav="true" aria-hidden="true"></div>
+		<nav class="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-50 grid grid-cols-5 rounded-full border border-hairline bg-canvas/95 p-1 text-xs shadow-[var(--shadow-float)] backdrop-blur lg:hidden" data-private-nav="true" aria-label="Mobile primary navigation">
+			{productNav.slice(0, 5).map((item) => (
+				<a class:list={['rounded-full px-2 py-2 text-center text-body', active === item.href && 'bg-ink text-white']} href={item.href}>
+					{item.label}
+				</a>
+			))}
+		</nav>
+	</>
+)}
 <InteractionLayer />

@@ -1,7 +1,6 @@
 ---
-import { Menu, Search, Shirt } from '@lucide/astro';
-import AuthStatus from '../auth/AuthStatus';
-import UploadActions from '../wardrobe/UploadActions';
+import { Shirt } from '@lucide/astro';
+import AuthHeaderControls from '../auth/AuthHeaderControls';
 import { productNav } from '../../data/wardrobe';
 
 const { active = '/' } = Astro.props;
@@ -16,48 +15,6 @@ const { active = '/' } = Astro.props;
 			<span>Digital Wardrobe</span>
 		</a>
 
-		<nav class="hidden items-center rounded-full border border-hairline bg-canvas px-1 py-1 text-sm text-body shadow-[var(--shadow-hairline)] lg:flex" aria-label="Primary navigation">
-			{productNav.map((item) => (
-				<a
-					class:list={[
-						'rounded-full px-3 py-1.5 transition hover:bg-canvas-soft hover:text-ink',
-						active === item.href && 'bg-ink text-white hover:bg-ink hover:text-white',
-					]}
-					href={item.href}
-				>
-					{item.label}
-				</a>
-			))}
-		</nav>
-
-		<div class="hidden items-center gap-2 lg:flex">
-			<a class="flex h-9 items-center gap-2 rounded-full border border-hairline bg-canvas px-3 text-sm font-medium text-ink transition hover:bg-canvas-soft" href="/discover">
-				<Search size={15} strokeWidth={1.8} />
-				Search
-			</a>
-			<AuthStatus client:load />
-			<UploadActions client:idle />
-		</div>
-
-		<details class="group relative lg:hidden">
-			<summary class="flex size-10 list-none items-center justify-center rounded-full border border-hairline bg-canvas text-ink">
-				<Menu size={18} strokeWidth={1.8} />
-			</summary>
-			<div class="absolute right-0 mt-3 w-[min(calc(100vw-32px),340px)] rounded-lg border border-hairline bg-canvas p-2 shadow-[var(--shadow-float)]">
-				<nav class="grid gap-1" aria-label="Mobile navigation">
-					{productNav.map((item) => (
-						<a class:list={['rounded-lg px-3 py-2 text-sm text-body', active === item.href && 'bg-canvas-soft text-ink']} href={item.href}>
-							{item.label}
-						</a>
-					))}
-					<a class:list={['rounded-lg px-3 py-2 text-sm text-body', active === '/sign-in' && 'bg-canvas-soft text-ink']} href="/sign-in">
-						Sign in
-					</a>
-				</nav>
-				<div class="mt-2 border-t border-hairline pt-2">
-					<UploadActions client:idle />
-				</div>
-			</div>
-		</details>
+		<AuthHeaderControls active={active} nav={productNav} client:load />
 	</div>
 </header>

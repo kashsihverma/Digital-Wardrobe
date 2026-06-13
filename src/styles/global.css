@@ -150,6 +150,15 @@ filter-chips [aria-pressed="false"] {
 	color: var(--color-body);
 }
 
+html:not([data-dw-auth="signed-in"]) [data-private-content="true"] {
+	visibility: hidden;
+	pointer-events: none;
+}
+
+html:not([data-dw-auth="signed-in"]) [data-private-nav="true"] {
+	display: none;
+}
+
 @theme inline {
 	--font-heading: var(--font-sans);
 	--font-sans: 'Geist Variable', sans-serif;
