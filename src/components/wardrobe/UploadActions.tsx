@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { onAuthStateChanged, type User } from "firebase/auth"
 import {
   AlertCircle,
@@ -41,7 +41,7 @@ const captureModes: Array<{
   label: string
   detail: string
 }> = [
-  { id: "camera", icon: Camera, label: "Take photo", detail: "Open camera on supported devices." },
+  { id: "camera", icon: Camera, label: "Take photo", detail: "Use your webcam or phone camera." },
   { id: "upload", icon: Upload, label: "Upload image", detail: "Pick an image from this device." },
   { id: "link", icon: Link2, label: "Import link", detail: "Use a hosted product image." },
 ]
@@ -87,6 +87,7 @@ const fieldClass = "h-11 rounded-md border-hairline bg-canvas px-3 text-sm text-
 const labelClass = "grid gap-1.5 text-sm font-medium text-ink"
 const selectClass =
   "h-11 w-full rounded-md border border-hairline bg-canvas px-3 text-sm text-ink outline-none focus-visible:border-link focus-visible:ring-2 focus-visible:ring-link/20"
+const frameClass = "mt-3 aspect-[4/5] w-full overflow-hidden rounded-md"
 
 function readFileAsDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
@@ -108,6 +109,12 @@ export function UploadActions({ triggerClassName = "" }: UploadActionsProps) {
   const [form, setForm] = useState(initialForm)
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const uploadInputRef = useRef<HTMLInputElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const streamRef = useRef<MediaStream | null>(null)
+  const [camStatus, setCamStatus] = useState<"idle" | "starting" | "live" | "error">("idle")
+  const [cameraRequested, setCameraRequested] = useState(false)
+  const [camAttempt, setCamAttempt] = useState(0)
+  const [caps, setCaps] = useState({ hasCameraApi: false, isCoarse: false, isSecure: false })
 
   useEffect(() => {
     if (!hasFirebaseConfig()) {
@@ -128,8 +135,25 @@ export function UploadActions({ triggerClassName = "" }: UploadActionsProps) {
     return () => unsubscribe()
   }, [])
 
+  const stopStream = useCallback(() => {
+    streamRef.current?.getTracks().forEach((track) => track.stop())
+    streamRef.current = null
+    if (videoRef.current) videoRef.current.srcObject = null
+  }, [])
+
+  useEffect(() => {
+    if (typeof navigator === "undefined" || typeof window === "undefined") return
+    setCaps({
+      hasCameraApi: Boolean(navigator.mediaDevices?.getUserMedia),
+      isCoarse: Boolean(window.matchMedia?.("(pointer: coarse)")?.matches),
+      isSecure: window.isSecureContext,
+    })
+  }, [])
+
   const canSave = Boolean(user && form.name.trim() && form.type.trim() && form.color.trim())
   const previewUrl = form.imageUrl.trim()
+  const useNativeCapture = caps.isCoarse || !caps.hasCameraApi || !caps.isSecure
+  const cameraLive = open && mode === "camera" && !previewUrl && !useNativeCapture && cameraRequested
   const signInHref = `/sign-in?redirect=${encodeURIComponent(typeof window === "undefined" ? "/wardrobe" : window.location.pathname)}`
 
   const autoTags = useMemo(
@@ -137,11 +161,14 @@ export function UploadActions({ triggerClassName = "" }: UploadActionsProps) {
     [form.color, form.occasion, form.type],
   )
 
-  const sendToast = (message: string) => {
+  const sendToast = useCallback((message: string) => {
     window.dispatchEvent(new CustomEvent("dw:toast", { detail: { message } }))
-  }
+  }, [])
 
   const reset = () => {
+    stopStream()
+    setCameraRequested(false)
+    setCamStatus("idle")
     setMode("camera")
     setSaving(false)
     setSaved(false)
@@ -182,8 +209,22 @@ export function UploadActions({ triggerClassName = "" }: UploadActionsProps) {
   }
 
   const chooseMode = (nextMode: CaptureMode) => {
+    if (nextMode !== "camera") {
+      stopStream()
+      setCameraRequested(false)
+      setCamStatus("idle")
+    }
     setMode(nextMode)
     setError("")
+
+    // Desktop camera mode opens a live getUserMedia stream (driven by the effect),
+    // so it never clicks the hidden file input.
+    if (nextMode === "camera" && !useNativeCapture) {
+      setCamStatus("starting")
+      setCameraRequested(true)
+      return
+    }
+
     window.requestAnimationFrame(() => {
       if (nextMode === "camera") {
         if (cameraInputRef.current) cameraInputRef.current.value = ""
@@ -194,6 +235,79 @@ export function UploadActions({ triggerClassName = "" }: UploadActionsProps) {
         uploadInputRef.current?.click()
       }
     })
+  }
+
+  const replaceImage = () => {
+    if (mode === "camera" && !useNativeCapture) {
+      setCamStatus("starting")
+      setCameraRequested(true)
+      updateForm("imageUrl", "")
+      return
+    }
+    chooseMode(mode === "link" ? "upload" : mode)
+  }
+
+  const handleFrameClick = () => {
+    if (previewUrl) {
+      replaceImage()
+      return
+    }
+    if (mode === "camera" && !useNativeCapture) {
+      setError("")
+      setCamStatus("starting")
+      setCameraRequested(true)
+      return
+    }
+    chooseMode(mode === "link" ? "upload" : mode)
+  }
+
+  const retryCamera = () => {
+    setError("")
+    setCamStatus("starting")
+    setCamAttempt((value) => value + 1)
+  }
+
+  const capturePhoto = () => {
+    const video = videoRef.current
+    if (!video || !video.videoWidth || !video.videoHeight) {
+      setError("Camera is still warming up — try again in a moment.")
+      return
+    }
+
+    const canvas = document.createElement("canvas")
+    const maxEdge = 1280
+    const scale = Math.min(1, maxEdge / Math.max(video.videoWidth, video.videoHeight))
+    canvas.width = Math.round(video.videoWidth * scale)
+    canvas.height = Math.round(video.videoHeight * scale)
+    const ctx = canvas.getContext("2d")
+    if (!ctx) {
+      stopStream()
+      setCamStatus("idle")
+      setError("Capture failed — use Upload instead.")
+      return
+    }
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+
+    // base64 payload decodes to ~3/4 of its string length; check decoded bytes, not chars.
+    const byteLength = (url: string) => Math.ceil((url.length - (url.indexOf(",") + 1)) * 0.75)
+    let quality = 0.82
+    let dataUrl = canvas.toDataURL("image/jpeg", quality)
+    while (byteLength(dataUrl) > 1_400_000 && quality > 0.4) {
+      quality -= 0.1
+      dataUrl = canvas.toDataURL("image/jpeg", quality)
+    }
+    if (byteLength(dataUrl) > 1_500_000) {
+      stopStream()
+      setCamStatus("idle")
+      setError("Use an image under 1.5 MB for now.")
+      return
+    }
+
+    stopStream()
+    setCamStatus("idle")
+    updateForm("imageUrl", dataUrl)
+    if (!form.name.trim()) updateForm("name", "Camera capture")
+    sendToast("Photo captured.")
   }
 
   const handleSave = async () => {
@@ -245,6 +359,60 @@ export function UploadActions({ triggerClassName = "" }: UploadActionsProps) {
     }
   }
 
+  // Single source of truth for the camera stream: starts when cameraLive flips true
+  // (or on retry via camAttempt) and the cleanup stops every track on capture, mode
+  // switch, dialog close, and unmount — so the camera indicator light never lingers.
+  useEffect(() => {
+    if (!cameraLive) {
+      setCamStatus("idle")
+      return
+    }
+
+    let cancelled = false
+    setCamStatus("starting")
+
+    void (async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 1280 } },
+        })
+        if (cancelled) {
+          stream.getTracks().forEach((track) => track.stop())
+          return
+        }
+        streamRef.current = stream
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream
+          await videoRef.current.play().catch(() => {})
+        }
+        if (!cancelled) setCamStatus("live")
+      } catch (nextError) {
+        if (cancelled) return
+        const name = nextError instanceof DOMException ? nextError.name : ""
+        const message =
+          name === "NotAllowedError" || name === "SecurityError"
+            ? "Camera access was blocked. Allow it in your browser, or use Upload."
+            : name === "NotFoundError" || name === "OverconstrainedError"
+              ? "No camera found. Try Upload or Import link."
+              : name === "NotReadableError"
+                ? "Your camera is busy in another app. Close it and retry, or use Upload."
+                : name === "NotSupportedError"
+                  ? "Camera isn't available in this context. Use Upload or Import link."
+                  : "Camera could not start. Use Upload or Import link."
+        setError(message)
+        sendToast(message)
+        stopStream()
+        setCamStatus("error")
+      }
+    })()
+
+    return () => {
+      cancelled = true
+      stopStream()
+    }
+  }, [cameraLive, camAttempt, stopStream])
+
   return (
     <Dialog
       open={open}
@@ -261,7 +429,7 @@ export function UploadActions({ triggerClassName = "" }: UploadActionsProps) {
       </DialogTrigger>
 
       <DialogContent
-        className="flex max-h-[min(880px,calc(100dvh-24px))] w-[min(calc(100vw-24px),920px)] max-w-none grid-rows-none flex-col gap-0 overflow-hidden rounded-xl border-hairline bg-canvas p-0 text-ink shadow-[var(--shadow-float)]"
+        className="flex max-h-[min(880px,calc(100dvh-24px))] w-[min(calc(100vw-24px),920px)] max-w-none grid-rows-none flex-col gap-0 overflow-hidden rounded-xl border-hairline bg-canvas p-0 text-ink shadow-[var(--shadow-float)] sm:max-w-none"
         showCloseButton={false}
       >
         <div className="flex shrink-0 items-start justify-between gap-4 border-b border-hairline px-4 py-4 sm:px-6">
@@ -365,27 +533,77 @@ export function UploadActions({ triggerClassName = "" }: UploadActionsProps) {
                     <div className="flex items-center justify-between gap-3">
                       <p className="font-mono text-xs text-body">PREVIEW</p>
                       {previewUrl ? (
-                        <button className="text-xs font-medium text-link" onClick={() => chooseMode(mode === "link" ? "upload" : mode)} type="button">
+                        <button className="text-xs font-medium text-link" onClick={replaceImage} type="button">
                           Replace
                         </button>
                       ) : null}
                     </div>
-                    <button
-                      className="mt-3 block aspect-[4/5] w-full overflow-hidden rounded-md bg-canvas-soft text-left transition hover:bg-canvas-soft-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link"
-                      onClick={() => chooseMode(mode === "link" ? "upload" : mode)}
-                      type="button"
-                    >
-                      {previewUrl ? (
-                        <img alt="Selected wardrobe item preview" className="h-full w-full object-cover" src={previewUrl} />
-                      ) : (
-                        <div className="grid h-full place-items-center p-6 text-center text-sm text-body">
-                          <div>
-                            <ImageIcon className="mx-auto mb-3 size-7 text-mute" />
-                            {mode === "camera" ? "Tap to open camera." : mode === "upload" ? "Tap to choose an image." : "Paste an image URL below."}
+                    {cameraLive ? (
+                      <div className={`${frameClass} relative bg-black`}>
+                        <video
+                          ref={videoRef}
+                          autoPlay
+                          muted
+                          playsInline
+                          aria-label="Live camera preview"
+                          className="h-full w-full object-cover"
+                          onPlaying={() => setCamStatus("live")}
+                        />
+                        <span className="sr-only" role="status" aria-live="polite">
+                          {camStatus === "starting" ? "Starting camera." : camStatus === "live" ? "Camera ready. Use the capture button to take a photo." : ""}
+                        </span>
+                        {camStatus === "starting" ? (
+                          <div className="absolute inset-0 grid place-items-center bg-black/40 text-white">
+                            <Loader2 aria-hidden="true" className="size-5 animate-spin" />
                           </div>
-                        </div>
-                      )}
-                    </button>
+                        ) : null}
+                        {camStatus === "error" ? (
+                          <div className="absolute inset-0 grid content-center justify-items-center gap-3 bg-canvas-soft p-5 text-center text-sm text-body">
+                            <span>Camera unavailable on this device.</span>
+                            <div className="flex flex-wrap justify-center gap-2">
+                              <button className="rounded-full bg-ink px-3 py-1.5 text-xs font-medium text-white hover:bg-ink/90" onClick={() => chooseMode("upload")} type="button">
+                                Upload instead
+                              </button>
+                              <button className="rounded-full border border-hairline px-3 py-1.5 text-xs font-medium text-ink hover:bg-canvas-soft" onClick={retryCamera} type="button">
+                                Retry
+                              </button>
+                            </div>
+                          </div>
+                        ) : camStatus === "live" ? (
+                          <button
+                            aria-label="Capture photo"
+                            className="absolute inset-x-0 bottom-3 mx-auto flex size-14 items-center justify-center rounded-full bg-white shadow-[var(--shadow-float)] ring-4 ring-ink/20 transition hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link"
+                            onClick={capturePhoto}
+                            type="button"
+                          >
+                            <span aria-hidden="true" className="size-11 rounded-full bg-ink" />
+                          </button>
+                        ) : null}
+                      </div>
+                    ) : (
+                      <button
+                        className={`${frameClass} block bg-canvas-soft text-left transition hover:bg-canvas-soft-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link`}
+                        onClick={handleFrameClick}
+                        type="button"
+                      >
+                        {previewUrl ? (
+                          <img alt="Selected wardrobe item preview" className="h-full w-full object-cover" src={previewUrl} />
+                        ) : (
+                          <div className="grid h-full place-items-center p-6 text-center text-sm text-body">
+                            <div>
+                              <ImageIcon className="mx-auto mb-3 size-7 text-mute" />
+                              {mode === "camera"
+                                ? useNativeCapture
+                                  ? "Tap to open camera."
+                                  : "Click to start your camera."
+                                : mode === "upload"
+                                  ? "Tap to choose an image."
+                                  : "Paste an image URL below."}
+                            </div>
+                          </div>
+                        )}
+                      </button>
+                    )}
                     <div className="mt-3 flex flex-wrap gap-2">
                       {autoTags.map((tag) => (
                         <span className="rounded-full border border-hairline bg-canvas px-2 py-1 text-xs text-body" key={tag}>
@@ -477,7 +695,7 @@ export function UploadActions({ triggerClassName = "" }: UploadActionsProps) {
 
             <div className="flex shrink-0 flex-col gap-3 border-t border-hairline bg-canvas px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-xs leading-5 text-body">
-                {mode === "camera" ? "Camera opens on phones and supported browsers." : mode === "upload" ? "Uploads are previewed before saving." : "Use direct image URLs for product references."}
+                {mode === "camera" ? (useNativeCapture ? "Camera opens on phones and supported browsers." : "Your webcam opens here — allow access, then tap the shutter.") : mode === "upload" ? "Uploads are previewed before saving." : "Use direct image URLs for product references."}
               </p>
               <div className="flex gap-2">
                 <DialogClose asChild>
