@@ -7,9 +7,11 @@ import ItemCard from '../components/wardrobe/ItemCard.astro';
 import OutfitCard from '../components/wardrobe/OutfitCard.astro';
 import SearchBox from '../components/wardrobe/SearchBox.astro';
 import SuggestionCard from '../components/wardrobe/SuggestionCard.astro';
-import { getWardrobeViewData } from '../lib/wardrobeData';
+import { getViewDataForViewer } from '../lib/wardrobeData';
 
-const { outfits, suggestions, wardrobeItems } = await getWardrobeViewData();
+const { outfits, suggestions, wardrobeItems } = await getViewDataForViewer(Astro.locals.viewer);
+const discoverSuggestion = suggestions[2] ?? suggestions[0];
+const discoverOutfit = outfits[1] ?? outfits[0];
 
 const ideas = [
 	{
@@ -90,8 +92,8 @@ const ideas = [
 								</div>
 							</div>
 						</div>
-						<SuggestionCard suggestion={suggestions[2]} />
-						<OutfitCard outfit={outfits[1]} items={wardrobeItems} />
+						{discoverSuggestion && <SuggestionCard suggestion={discoverSuggestion} />}
+						{discoverOutfit && <OutfitCard outfit={discoverOutfit} items={wardrobeItems} />}
 					</aside>
 				</div>
 			</div>

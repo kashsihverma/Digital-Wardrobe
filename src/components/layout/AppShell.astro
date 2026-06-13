@@ -13,7 +13,7 @@ const { active = '/', private: isPrivate = false } = Astro.props;
 	<slot />
 </main>
 <SiteFooter />
-{isPrivate && <PrivateAccessGate client:load />}
+{isPrivate && <PrivateAccessGate initialViewerState={Astro.locals.viewer?.state ?? 'none'} client:load />}
 {isPrivate && (
 	<>
 		<div class="pointer-events-none fixed inset-x-0 bottom-0 z-40 h-28 bg-canvas-soft/95 backdrop-blur lg:hidden" data-private-nav="true" aria-hidden="true"></div>

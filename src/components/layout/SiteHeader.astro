@@ -15,6 +15,6 @@ const { active = '/' } = Astro.props;
 			<span>Digital Wardrobe</span>
 		</a>
 
-		<AuthHeaderControls active={active} nav={productNav} client:load />
+		<AuthHeaderControls active={active} nav={productNav} initialViewerState={Astro.locals.viewer?.state ?? 'none'} client:load />
 	</div>
 </header>

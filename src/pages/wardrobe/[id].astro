@@ -9,7 +9,7 @@ import WardrobeItemActions from '../../components/wardrobe/WardrobeItemActions';
 import { getWardrobeItemBySlug } from '../../lib/wardrobeData';
 
 const slug = Astro.params.id ?? '';
-const { item, suggestions, wardrobeItems } = await getWardrobeItemBySlug(slug);
+const { item, suggestions, wardrobeItems } = await getWardrobeItemBySlug(slug, Astro.locals.viewer);
 
 if (!item) {
 	return Astro.redirect('/wardrobe');
@@ -72,7 +72,7 @@ const related = wardrobeItems.filter((candidate) => candidate.id !== item.id).sl
 					</section>
 
 					<aside class="grid content-start gap-4">
-						<SuggestionCard suggestion={suggestions[0]} />
+						{suggestions[0] && <SuggestionCard suggestion={suggestions[0]} />}
 						<div class="rounded-lg border border-hairline bg-canvas p-5 shadow-[var(--shadow-card)]">
 							<div class="flex items-center gap-3">
 								<div class="flex size-10 items-center justify-center rounded-full bg-canvas-soft">

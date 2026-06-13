@@ -1,0 +1,50 @@
+---
+import { Shirt } from '@lucide/astro';
+
+interface Props {
+	title: string;
+	body?: string;
+	ctaLabel?: string;
+	ctaHref?: string;
+	ctaEvent?: string;
+}
+
+const { title, body, ctaLabel, ctaHref, ctaEvent } = Astro.props;
+---
+
+<div class="rounded-lg border border-dashed border-hairline bg-canvas p-10 text-center shadow-[var(--shadow-card)]">
+	<div class="mx-auto flex size-12 items-center justify-center rounded-full bg-canvas-soft text-ink">
+		<Shirt size={20} strokeWidth={1.6} />
+	</div>
+	<h2 class="mt-5 text-lg font-semibold text-ink">{title}</h2>
+	{body && <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-body">{body}</p>}
+	{ctaLabel && ctaHref && (
+		<a class="mt-6 inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-ink px-4 text-sm font-medium text-white" href={ctaHref}>
+			{ctaLabel}
+		</a>
+	)}
+	{ctaLabel && ctaEvent && (
+		<button
+			class="mt-6 inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-ink px-4 text-sm font-medium text-white"
+			data-empty-cta-event={ctaEvent}
+			type="button"
+		>
+			{ctaLabel}
+		</button>
+	)}
+</div>
+
+<script>
+	document.addEventListener('click', (event) => {
+		const button = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-empty-cta-event]');
+		const name = button?.dataset.emptyCtaEvent;
+		if (!name) return;
+		// Adding items requires a signed-in account. Guests (or unauthenticated
+		// viewers) are sent to sign-in instead of firing an event nothing handles.
+		if (document.documentElement.dataset.dwViewer === 'user') {
+			window.dispatchEvent(new CustomEvent(name));
+		} else {
+			window.location.assign('/sign-in');
+		}
+	});
+</script>

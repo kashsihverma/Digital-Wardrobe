@@ -16,6 +16,7 @@ type NavItem = {
 type Props = {
   active?: string
   nav: NavItem[]
+  initialViewerState?: string
 }
 
 const publicNav = [
@@ -23,9 +24,14 @@ const publicNav = [
   { href: "/#privacy", label: "Privacy" },
 ]
 
-export function AuthHeaderControls({ active = "/", nav }: Props) {
+export function AuthHeaderControls({ active = "/", nav, initialViewerState = "none" }: Props) {
   const [ready, setReady] = useState(!hasFirebaseConfig())
   const [user, setUser] = useState<User | null>(null)
+  const [viewerState, setViewerState] = useState(initialViewerState)
+
+  useEffect(() => {
+    setViewerState(document.documentElement.dataset.dwViewer ?? "none")
+  }, [])
 
   useEffect(() => {
     if (!hasFirebaseConfig()) {
@@ -46,12 +52,33 @@ export function AuthHeaderControls({ active = "/", nav }: Props) {
     return () => unsubscribe()
   }, [])
 
+  const clearServerSession = async () => {
+    try {
+      await fetch("/api/session", { method: "DELETE" })
+    } catch {
+      // ignore — cookies expire on their own
+    }
+    try {
+      window.sessionStorage.removeItem("dw:session-synced")
+    } catch {
+      // ignore
+    }
+  }
+
   const handleSignOut = async () => {
+    await clearServerSession()
     const auth = await getFirebaseAuth()
     await signOut(auth)
     window.dispatchEvent(new CustomEvent("dw:toast", { detail: { message: "Signed out of Digital Wardrobe." } }))
     window.location.assign("/")
   }
+
+  const handleExitGuest = async () => {
+    await clearServerSession()
+    window.location.assign("/")
+  }
+
+  const isGuest = !user && viewerState === "guest"
 
   if (!ready) {
     return (
@@ -62,7 +89,7 @@ export function AuthHeaderControls({ active = "/", nav }: Props) {
     )
   }
 
-  const navItems = user ? nav : publicNav
+  const navItems = user || isGuest ? nav : publicNav
 
   return (
     <>
@@ -104,6 +131,24 @@ export function AuthHeaderControls({ active = "/", nav }: Props) {
               <LogOut className="size-4" />
             </Button>
           </>
+        ) : isGuest ? (
+          <>
+            <span className="inline-flex h-9 items-center rounded-full border border-hairline bg-canvas-soft px-3 text-xs font-medium text-body">
+              Guest mode
+            </span>
+            <Button
+              aria-label="Exit guest mode"
+              className="size-9 rounded-full border border-hairline bg-canvas p-0 text-ink shadow-[var(--shadow-hairline)] hover:bg-canvas-soft"
+              onClick={handleExitGuest}
+              type="button"
+            >
+              <LogOut className="size-4" />
+            </Button>
+            <a className="inline-flex h-9 items-center gap-2 rounded-full bg-ink px-4 text-sm font-medium text-white transition hover:bg-ink/90" href="/sign-in">
+              <LogIn className="size-4" />
+              Sign in to save
+            </a>
+          </>
         ) : (
           <a className="inline-flex h-9 items-center gap-2 rounded-full bg-ink px-4 text-sm font-medium text-white transition hover:bg-ink/90" href="/sign-in">
             <LogIn className="size-4" />
@@ -125,7 +170,7 @@ export function AuthHeaderControls({ active = "/", nav }: Props) {
             ))}
             {!user ? (
               <a className="rounded-lg bg-ink px-3 py-2 text-sm font-medium text-white" href="/sign-in">
-                Sign in
+                {isGuest ? "Sign in to save" : "Sign in"}
               </a>
             ) : null}
           </nav>
@@ -134,6 +179,12 @@ export function AuthHeaderControls({ active = "/", nav }: Props) {
               <UploadActions triggerClassName="w-full justify-start rounded-lg bg-canvas px-3 text-ink hover:bg-canvas-soft" />
               <button className="rounded-lg border border-hairline px-3 py-2 text-left text-sm font-medium text-ink" onClick={handleSignOut} type="button">
                 Sign out
+              </button>
+            </div>
+          ) : isGuest ? (
+            <div className="mt-2 grid gap-2 border-t border-hairline pt-2">
+              <button className="rounded-lg border border-hairline px-3 py-2 text-left text-sm font-medium text-ink" onClick={handleExitGuest} type="button">
+                Exit guest mode
               </button>
             </div>
           ) : null}

@@ -10,10 +10,12 @@ const {
 	title = 'Digital Wardrobe',
 	description = 'A private wardrobe operating system for capturing garments, building outfits, planning events, and understanding what you actually wear.',
 } = Astro.props;
+
+const viewerState = Astro.locals.viewer?.state ?? 'none';
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-dw-viewer={viewerState}>
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />

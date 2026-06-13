@@ -3,11 +3,13 @@ import { Archive, ChartNoAxesColumnIncreasing, Shirt, ShoppingBag } from '@lucid
 import Layout from '../layouts/Layout.astro';
 import AppShell from '../components/layout/AppShell.astro';
 import ProductNav from '../components/layout/ProductNav.astro';
+import EmptyState from '../components/wardrobe/EmptyState.astro';
 import StatCard from '../components/wardrobe/StatCard.astro';
 import SuggestionCard from '../components/wardrobe/SuggestionCard.astro';
-import { getWardrobeViewData } from '../lib/wardrobeData';
+import { getViewDataForViewer } from '../lib/wardrobeData';
 
-const { insights, suggestions } = await getWardrobeViewData();
+const { insights, suggestions } = await getViewDataForViewer(Astro.locals.viewer);
+const hasInsights = insights.length > 0;
 
 const panels = [
 	[Archive, 'Declutter queue', '11 pieces are under threshold; 4 have duplicate coverage.'],
@@ -20,48 +22,59 @@ const panels = [
 	<AppShell active="/insights" private>
 		<section class="bg-canvas-soft py-8">
 			<ProductNav active="/insights" />
-			<div class="container-page grid gap-6 lg:grid-cols-[1fr_340px]">
-				<section>
-					<div class="rounded-lg border border-hairline bg-canvas p-6 shadow-[var(--shadow-card)]">
-						<p class="font-mono text-xs text-body">WARDROBE HEALTH</p>
-						<h1 class="mt-2 text-3xl font-semibold text-ink">Wear data that helps you buy less and style more.</h1>
-						<div class="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-							{insights.map((metric) => <StatCard {...metric} />)}
-						</div>
-					</div>
-					<div class="mt-5 grid gap-4 md:grid-cols-3">
-						{panels.map(([Icon, title, body]) => (
-							<article class="rounded-lg border border-hairline bg-canvas p-5 shadow-[var(--shadow-card)]">
-								<div class="flex size-10 items-center justify-center rounded-full bg-canvas-soft text-ink">
-									<Icon size={17} strokeWidth={1.8} />
-								</div>
-								<h2 class="mt-5 text-lg font-semibold text-ink">{title}</h2>
-								<p class="mt-2 text-sm leading-6 text-body">{body}</p>
-							</article>
-						))}
-					</div>
-					<div class="mt-5 rounded-lg border border-hairline bg-canvas p-5 shadow-[var(--shadow-card)]">
-						<div class="flex items-center gap-3">
-							<div class="flex size-10 items-center justify-center rounded-full bg-ink text-white">
-								<ChartNoAxesColumnIncreasing size={17} strokeWidth={1.8} />
-							</div>
-							<div>
-								<p class="text-sm font-medium text-ink">Wear frequency</p>
-								<p class="text-sm text-body">Most outfits cluster around nine neutral items.</p>
+			{hasInsights ? (
+				<div class="container-page grid gap-6 lg:grid-cols-[1fr_340px]">
+					<section>
+						<div class="rounded-lg border border-hairline bg-canvas p-6 shadow-[var(--shadow-card)]">
+							<p class="font-mono text-xs text-body">WARDROBE HEALTH</p>
+							<h1 class="mt-2 text-3xl font-semibold text-ink">Wear data that helps you buy less and style more.</h1>
+							<div class="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+								{insights.map((metric) => <StatCard {...metric} />)}
 							</div>
 						</div>
-						<div class="mt-5 grid h-64 items-end gap-2 rounded-lg bg-canvas-soft p-4 sm:grid-cols-12">
-							{[28, 40, 34, 62, 72, 48, 84, 58, 44, 70, 52, 38].map((height, index) => (
-								<div class="rounded-t-md bg-sage" style={`height: ${height}%`} title={`Month ${index + 1}`}></div>
+						<div class="mt-5 grid gap-4 md:grid-cols-3">
+							{panels.map(([Icon, title, body]) => (
+								<article class="rounded-lg border border-hairline bg-canvas p-5 shadow-[var(--shadow-card)]">
+									<div class="flex size-10 items-center justify-center rounded-full bg-canvas-soft text-ink">
+										<Icon size={17} strokeWidth={1.8} />
+									</div>
+									<h2 class="mt-5 text-lg font-semibold text-ink">{title}</h2>
+									<p class="mt-2 text-sm leading-6 text-body">{body}</p>
+								</article>
 							))}
 						</div>
-					</div>
-				</section>
+						<div class="mt-5 rounded-lg border border-hairline bg-canvas p-5 shadow-[var(--shadow-card)]">
+							<div class="flex items-center gap-3">
+								<div class="flex size-10 items-center justify-center rounded-full bg-ink text-white">
+									<ChartNoAxesColumnIncreasing size={17} strokeWidth={1.8} />
+								</div>
+								<div>
+									<p class="text-sm font-medium text-ink">Wear frequency</p>
+									<p class="text-sm text-body">Most outfits cluster around nine neutral items.</p>
+								</div>
+							</div>
+							<div class="mt-5 grid h-64 items-end gap-2 rounded-lg bg-canvas-soft p-4 sm:grid-cols-12">
+								{[28, 40, 34, 62, 72, 48, 84, 58, 44, 70, 52, 38].map((height, index) => (
+									<div class="rounded-t-md bg-sage" style={`height: ${height}%`} title={`Month ${index + 1}`}></div>
+								))}
+							</div>
+						</div>
+					</section>
 
-				<aside class="grid content-start gap-4">
-					{suggestions.map((suggestion) => <SuggestionCard suggestion={suggestion} />)}
-				</aside>
-			</div>
+					<aside class="grid content-start gap-4">
+						{suggestions.map((suggestion) => <SuggestionCard suggestion={suggestion} />)}
+					</aside>
+				</div>
+			) : (
+				<div class="container-page">
+					<EmptyState
+						title="No insights yet."
+						body="Wear data, cost-per-wear, and declutter signals appear once you add items and start logging how often you wear them."
+						ctaLabel="Add your first item"
+						ctaEvent="dw:add-item"
+					/>
+				</div>
+			)}
 		</section>
 	</AppShell>
 </Layout>

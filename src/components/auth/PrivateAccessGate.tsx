@@ -9,19 +9,65 @@ import { getFirebaseAuth, hasFirebaseConfig } from "@/lib/firebase"
 type Props = {
   title?: string
   body?: string
+  initialViewerState?: string
 }
 
 export function PrivateAccessGate({
   title = "Sign in to open your wardrobe.",
   body = "Your items, outfits, planner, and insights are private to your account.",
+  initialViewerState = "none",
 }: Props) {
   const [ready, setReady] = useState(!hasFirebaseConfig())
   const [user, setUser] = useState<User | null>(null)
+  const [viewerState, setViewerState] = useState(initialViewerState)
 
   const signInHref = useMemo(() => {
     if (typeof window === "undefined") return "/sign-in"
     return `/sign-in?redirect=${encodeURIComponent(window.location.pathname)}`
   }, [])
+
+  useEffect(() => {
+    setViewerState(document.documentElement.dataset.dwViewer ?? "none")
+  }, [])
+
+  // Reconcile a client-side Firebase session that has no server cookie yet
+  // (e.g. a session created before session cookies existed): mint the cookie,
+  // then reload once so server-rendered pages show this user's own data.
+  useEffect(() => {
+    if (!user || viewerState === "user" || typeof window === "undefined") return
+    if (window.sessionStorage.getItem("dw:session-synced") === "1") return
+
+    let cancelled = false
+    void (async () => {
+      try {
+        const token = await user.getIdToken()
+        const response = await fetch("/api/session", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (!response.ok || cancelled) return
+        window.sessionStorage.setItem("dw:session-synced", "1")
+        window.location.reload()
+      } catch {
+        // Transient failure — clear the guard so a later attempt can retry.
+        try {
+          window.sessionStorage.removeItem("dw:session-synced")
+        } catch {
+          // ignore
+        }
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [user, viewerState])
+
+  useEffect(() => {
+    if (viewerState === "user" && typeof window !== "undefined") {
+      window.sessionStorage.removeItem("dw:session-synced")
+    }
+  }, [viewerState])
 
   useEffect(() => {
     if (!hasFirebaseConfig()) {
@@ -48,6 +94,9 @@ export function PrivateAccessGate({
     return () => unsubscribe()
   }, [])
 
+  // Guests are known from the server-rendered viewer state, so allow content
+  // immediately without waiting on the Firebase readiness check.
+  if (viewerState === "guest") return null
   if (ready && user) return null
 
   return (

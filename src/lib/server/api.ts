@@ -36,7 +36,7 @@ export async function requireDatabaseUser(request: Request) {
   }
 }
 
-async function upsertUserFromToken(token: DecodedIdToken) {
+export async function upsertUserFromToken(token: DecodedIdToken) {
   const email = token.email
 
   if (!email) {

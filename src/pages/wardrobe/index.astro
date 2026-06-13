@@ -2,59 +2,72 @@
 import Layout from '../../layouts/Layout.astro';
 import AppShell from '../../components/layout/AppShell.astro';
 import ProductNav from '../../components/layout/ProductNav.astro';
+import EmptyState from '../../components/wardrobe/EmptyState.astro';
 import FilterChips from '../../components/wardrobe/FilterChips.astro';
 import ItemCard from '../../components/wardrobe/ItemCard.astro';
 import SearchBox from '../../components/wardrobe/SearchBox.astro';
 import StatCard from '../../components/wardrobe/StatCard.astro';
 import { filterGroups } from '../../data/wardrobe';
-import { getWardrobeViewData } from '../../lib/wardrobeData';
+import { getViewDataForViewer } from '../../lib/wardrobeData';
 
-const { insights, wardrobeItems } = await getWardrobeViewData();
+const { insights, wardrobeItems } = await getViewDataForViewer(Astro.locals.viewer);
+const hasItems = wardrobeItems.length > 0;
 ---
 
 <Layout title="Wardrobe | Digital Wardrobe">
 	<AppShell active="/wardrobe" private>
 		<section class="bg-canvas-soft py-8">
 			<ProductNav active="/wardrobe" />
-			<div class="container-page grid gap-6 lg:grid-cols-[280px_1fr_300px]">
-				<aside class="hidden rounded-lg border border-hairline bg-canvas p-4 shadow-[var(--shadow-card)] lg:block">
-					<p class="font-mono text-xs text-body">FILTERS</p>
-					<div class="mt-4 grid gap-5">
-						<FilterChips groups={filterGroups} />
-					</div>
-				</aside>
-
-				<section>
-					<div class="sticky top-20 z-20 rounded-lg border border-hairline bg-canvas/95 p-3 shadow-[var(--shadow-card)] backdrop-blur">
-						<SearchBox />
-						<div class="mt-3 lg:hidden">
-							<FilterChips groups={filterGroups.slice(0, 2)} />
+			{hasItems ? (
+				<div class="container-page grid gap-6 lg:grid-cols-[280px_1fr_300px]">
+					<aside class="hidden rounded-lg border border-hairline bg-canvas p-4 shadow-[var(--shadow-card)] lg:block">
+						<p class="font-mono text-xs text-body">FILTERS</p>
+						<div class="mt-4 grid gap-5">
+							<FilterChips groups={filterGroups} />
 						</div>
-					</div>
-					<div class="mt-5 flex items-center justify-between gap-3">
-						<p class="font-mono text-xs text-body" data-result-count>{wardrobeItems.length} ITEMS</p>
-						<button
-							class="rounded-full border border-hairline bg-canvas px-3 py-1.5 text-xs text-body shadow-[var(--shadow-hairline)]"
-							data-toast="Saved this wardrobe view for later."
-							data-track="saved_filter_created"
-							type="button"
-						>
-							Save view
-						</button>
-					</div>
-					<div class="mt-3 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4" data-wardrobe-grid>
-						{wardrobeItems.map((item) => <ItemCard item={item} />)}
-					</div>
-					<div class="mt-4 hidden rounded-lg border border-hairline bg-canvas p-8 text-center shadow-[var(--shadow-card)]" data-empty-state>
-						<p class="text-lg font-semibold text-ink">No pieces match this view.</p>
-						<p class="mt-2 text-sm text-body">Try clearing a chip or searching for a broader occasion.</p>
-					</div>
-				</section>
+					</aside>
 
-				<aside class="grid content-start gap-4">
-					{insights.slice(0, 3).map((metric) => <StatCard {...metric} />)}
-				</aside>
-			</div>
+					<section>
+						<div class="sticky top-20 z-20 rounded-lg border border-hairline bg-canvas/95 p-3 shadow-[var(--shadow-card)] backdrop-blur">
+							<SearchBox />
+							<div class="mt-3 lg:hidden">
+								<FilterChips groups={filterGroups.slice(0, 2)} />
+							</div>
+						</div>
+						<div class="mt-5 flex items-center justify-between gap-3">
+							<p class="font-mono text-xs text-body" data-result-count>{wardrobeItems.length} ITEMS</p>
+							<button
+								class="rounded-full border border-hairline bg-canvas px-3 py-1.5 text-xs text-body shadow-[var(--shadow-hairline)]"
+								data-toast="Saved this wardrobe view for later."
+								data-track="saved_filter_created"
+								type="button"
+							>
+								Save view
+							</button>
+						</div>
+						<div class="mt-3 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4" data-wardrobe-grid>
+							{wardrobeItems.map((item) => <ItemCard item={item} />)}
+						</div>
+						<div class="mt-4 hidden rounded-lg border border-hairline bg-canvas p-8 text-center shadow-[var(--shadow-card)]" data-empty-state>
+							<p class="text-lg font-semibold text-ink">No pieces match this view.</p>
+							<p class="mt-2 text-sm text-body">Try clearing a chip or searching for a broader occasion.</p>
+						</div>
+					</section>
+
+					<aside class="grid content-start gap-4">
+						{insights.slice(0, 3).map((metric) => <StatCard {...metric} />)}
+					</aside>
+				</div>
+			) : (
+				<div class="container-page">
+					<EmptyState
+						title="Your wardrobe is empty."
+						body="Add your first piece — snap a photo, upload an image, or paste a product link — and it shows up here."
+						ctaLabel="Add your first item"
+						ctaEvent="dw:add-item"
+					/>
+				</div>
+			)}
 		</section>
 	</AppShell>
 </Layout>

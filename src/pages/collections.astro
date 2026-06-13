@@ -3,10 +3,12 @@ import { Share2 } from '@lucide/astro';
 import Layout from '../layouts/Layout.astro';
 import AppShell from '../components/layout/AppShell.astro';
 import ProductNav from '../components/layout/ProductNav.astro';
+import EmptyState from '../components/wardrobe/EmptyState.astro';
 import ItemPhoto from '../components/wardrobe/ItemPhoto.astro';
-import { getWardrobeViewData } from '../lib/wardrobeData';
+import { getViewDataForViewer } from '../lib/wardrobeData';
 
-const { wardrobeItems } = await getWardrobeViewData();
+const { wardrobeItems } = await getViewDataForViewer(Astro.locals.viewer);
+const hasItems = wardrobeItems.length > 0;
 
 const collections = [
 	{ title: 'June work capsule', items: wardrobeItems.slice(0, 5), note: 'Five-piece base for client days.' },
@@ -36,34 +38,43 @@ const collections = [
 						Create share card
 					</button>
 				</div>
-				<div class="grid gap-5 lg:grid-cols-3">
-					{collections.map((collection) => (
-						<article class="rounded-lg border border-hairline bg-canvas p-5 shadow-[var(--shadow-card)]">
-							<div class="grid grid-cols-3 gap-2 rounded-lg bg-canvas-soft p-3">
-								{collection.items.map((item) => (
-									<div class="group/card rounded-md bg-white p-1 shadow-[var(--shadow-hairline)]">
-										<ItemPhoto item={item} compact />
-									</div>
-								))}
-							</div>
-							<h2 class="mt-5 text-xl font-semibold text-ink">{collection.title}</h2>
-							<p class="mt-2 text-sm leading-6 text-body">{collection.note}</p>
-							<div class="mt-5 flex flex-wrap gap-2">
-								<span class="rounded-full bg-canvas-soft px-3 py-1 text-xs text-body">Private source items</span>
-								<span class="rounded-full bg-canvas-soft px-3 py-1 text-xs text-body">Link preview ready</span>
-							</div>
-							<button
-								class="mt-5 min-h-10 rounded-full border border-hairline px-4 text-sm font-medium text-ink"
-								data-copy-text={`https://digital-wardrobe.local/lookbook/${collection.title.toLowerCase().replaceAll(' ', '-')}`}
-								data-toast={`${collection.title} share link copied.`}
-								data-track="share_card_exported"
-								type="button"
-							>
-								Copy lookbook link
-							</button>
-						</article>
-					))}
-				</div>
+				{hasItems ? (
+					<div class="grid gap-5 lg:grid-cols-3">
+						{collections.map((collection) => (
+							<article class="rounded-lg border border-hairline bg-canvas p-5 shadow-[var(--shadow-card)]">
+								<div class="grid grid-cols-3 gap-2 rounded-lg bg-canvas-soft p-3">
+									{collection.items.map((item) => (
+										<div class="group/card rounded-md bg-white p-1 shadow-[var(--shadow-hairline)]">
+											<ItemPhoto item={item} compact />
+										</div>
+									))}
+								</div>
+								<h2 class="mt-5 text-xl font-semibold text-ink">{collection.title}</h2>
+								<p class="mt-2 text-sm leading-6 text-body">{collection.note}</p>
+								<div class="mt-5 flex flex-wrap gap-2">
+									<span class="rounded-full bg-canvas-soft px-3 py-1 text-xs text-body">Private source items</span>
+									<span class="rounded-full bg-canvas-soft px-3 py-1 text-xs text-body">Link preview ready</span>
+								</div>
+								<button
+									class="mt-5 min-h-10 rounded-full border border-hairline px-4 text-sm font-medium text-ink"
+									data-copy-text={`https://digital-wardrobe.local/lookbook/${collection.title.toLowerCase().replaceAll(' ', '-')}`}
+									data-toast={`${collection.title} share link copied.`}
+									data-track="share_card_exported"
+									type="button"
+								>
+									Copy lookbook link
+								</button>
+							</article>
+						))}
+					</div>
+				) : (
+					<EmptyState
+						title="No collections yet."
+						body="Collections are built from your wardrobe items. Add a few pieces, then group them into shareable lookbooks."
+						ctaLabel="Add your first item"
+						ctaEvent="dw:add-item"
+					/>
+				)}
 			</div>
 		</section>
 	</AppShell>

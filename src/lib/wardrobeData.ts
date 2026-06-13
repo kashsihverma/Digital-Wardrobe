@@ -1,13 +1,29 @@
 import type { EventPlan, Outfit, WardrobeItem } from "@/data/wardrobe"
 import { events as fallbackEvents, insights as fallbackInsights, outfits as fallbackOutfits, suggestions as fallbackSuggestions, wardrobeItems as fallbackItems } from "@/data/wardrobe"
 import { prisma } from "@/lib/prisma"
+import type { Viewer } from "@/lib/server/viewer"
 
 const DEMO_EMAIL = "demo@digital-wardrobe.local"
 
 const lower = (value: string) => value.toLowerCase()
 const status = (value: string) => lower(value).replaceAll("_", "-")
 
-export async function getWardrobeViewData(email = DEMO_EMAIL) {
+type Suggestion = { title: string; reason: string; tag: string }
+type Insight = { label: string; value: string; detail: string }
+
+export type ViewData = {
+  wardrobeItems: WardrobeItem[]
+  outfits: Outfit[]
+  events: EventPlan[]
+  suggestions: Suggestion[]
+  insights: Insight[]
+}
+
+/**
+ * Load one account's wardrobe from the database. Returns null when the user
+ * does not exist or the query fails, so callers decide their own fallback.
+ */
+async function loadUserData(email: string): Promise<ViewData | null> {
   try {
     const user = await prisma.user.findUnique({
       where: { email },
@@ -25,7 +41,7 @@ export async function getWardrobeViewData(email = DEMO_EMAIL) {
       },
     })
 
-    if (!user) return fallbackData()
+    if (!user) return null
 
     const wardrobeItems: WardrobeItem[] = user.items.map((item) => ({
       id: item.slug,
@@ -73,24 +89,45 @@ export async function getWardrobeViewData(email = DEMO_EMAIL) {
       insights: user.insights.map(({ label, value, detail }) => ({ label, value, detail })),
     }
   } catch {
-    return fallbackData()
+    return null
   }
 }
 
-export async function getWardrobeItemBySlug(slug: string) {
-  const data = await getWardrobeViewData()
-  return {
-    ...data,
-    item: data.wardrobeItems.find((candidate) => candidate.id === slug),
-  }
+export function emptyViewData(): ViewData {
+  return { wardrobeItems: [], outfits: [], events: [], suggestions: [], insights: [] }
 }
 
-function fallbackData() {
+function fallbackData(): ViewData {
   return {
     wardrobeItems: fallbackItems,
     outfits: fallbackOutfits,
     events: fallbackEvents,
     suggestions: fallbackSuggestions,
     insights: fallbackInsights,
+  }
+}
+
+/** Demo account — used for the public landing showcase and guest mode. */
+export async function getDemoViewData(): Promise<ViewData> {
+  return (await loadUserData(DEMO_EMAIL)) ?? fallbackData()
+}
+
+/** A real account. Never falls back to demo content — empty means empty. */
+export async function getWardrobeViewData(email: string): Promise<ViewData> {
+  return (await loadUserData(email)) ?? emptyViewData()
+}
+
+/** Resolve the right dataset for the current viewer. */
+export async function getViewDataForViewer(viewer: Viewer | undefined): Promise<ViewData> {
+  if (viewer?.state === "guest") return getDemoViewData()
+  if (viewer?.state === "user") return getWardrobeViewData(viewer.email)
+  return emptyViewData()
+}
+
+export async function getWardrobeItemBySlug(slug: string, viewer: Viewer | undefined) {
+  const data = await getViewDataForViewer(viewer)
+  return {
+    ...data,
+    item: data.wardrobeItems.find((candidate) => candidate.id === slug),
   }
 }

@@ -11,10 +11,10 @@ import OutfitCard from '../components/wardrobe/OutfitCard.astro';
 import StatCard from '../components/wardrobe/StatCard.astro';
 import SuggestionCard from '../components/wardrobe/SuggestionCard.astro';
 import { itemImages } from '../lib/itemImages';
-import { getWardrobeViewData } from '../lib/wardrobeData';
+import { getDemoViewData } from '../lib/wardrobeData';
 
 const heroStripItems = ['camel-blazer', 'ivory-knit', 'sage-overshirt', 'structured-tote'];
-const { events, insights, outfits, suggestions, wardrobeItems } = await getWardrobeViewData();
+const { events, insights, outfits, suggestions, wardrobeItems } = await getDemoViewData();
 ---
 
 <Layout title="Digital Wardrobe | Private outfit planning and wardrobe intelligence">
@@ -139,8 +139,8 @@ const { events, insights, outfits, suggestions, wardrobeItems } = await getWardr
 					<div class="grid gap-4 sm:grid-cols-2">
 						{insights.slice(0, 2).map((metric) => <StatCard {...metric} />)}
 					</div>
-					<EventCard event={events[0]} />
-					<OutfitCard outfit={outfits[0]} items={wardrobeItems} />
+					{events[0] && <EventCard event={events[0]} />}
+					{outfits[0] && <OutfitCard outfit={outfits[0]} items={wardrobeItems} />}
 				</div>
 			</div>
 		</section>

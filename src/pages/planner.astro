@@ -6,10 +6,12 @@ import ProductNav from '../components/layout/ProductNav.astro';
 import EventCard from '../components/wardrobe/EventCard.astro';
 import OutfitCard from '../components/wardrobe/OutfitCard.astro';
 import SuggestionCard from '../components/wardrobe/SuggestionCard.astro';
-import { getWardrobeViewData } from '../lib/wardrobeData';
+import { getViewDataForViewer } from '../lib/wardrobeData';
 
-const { events, outfits, suggestions, wardrobeItems } = await getWardrobeViewData();
+const { events, outfits, suggestions, wardrobeItems } = await getViewDataForViewer(Astro.locals.viewer);
 const days = ['10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21'];
+const plannerOutfit = outfits[2] ?? outfits[0];
+const plannerSuggestion = suggestions[1] ?? suggestions[0];
 ---
 
 <Layout title="Planner | Digital Wardrobe">
@@ -64,11 +66,8 @@ const days = ['10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', 
 					</div>
 					<div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
 						{days.map((day) => (
-							<div class:list={['min-h-28 rounded-lg border border-hairline bg-canvas-soft p-3', ['14', '15', '17'].includes(day) && 'bg-canvas shadow-[var(--shadow-card)]']}>
+							<div class="min-h-28 rounded-lg border border-hairline bg-canvas-soft p-3">
 								<p class="font-mono text-xs text-body">Jun {day}</p>
-								{day === '14' && <p class="mt-4 text-sm font-medium text-ink">Client review</p>}
-								{day === '15' && <p class="mt-4 text-sm font-medium text-ink">Dinner</p>}
-								{day === '17' && <p class="mt-4 text-sm font-medium text-ink">Flight</p>}
 							</div>
 						))}
 					</div>
@@ -82,13 +81,18 @@ const days = ['10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', 
 							</div>
 							<div>
 								<p class="text-sm font-medium">Next decision</p>
-								<p class="text-sm text-white/70">Friday review, 26 C, polished casual.</p>
+								<p class="text-sm text-white/70">Plan an event to line up an outfit ahead of time.</p>
 							</div>
 						</div>
 					</div>
 					{events.map((event) => <EventCard event={event} />)}
-					<OutfitCard outfit={outfits[2]} items={wardrobeItems} />
-					<SuggestionCard suggestion={suggestions[1]} />
+					{events.length === 0 && (
+						<div class="rounded-lg border border-dashed border-hairline bg-canvas p-5 text-sm leading-6 text-body shadow-[var(--shadow-card)]">
+							No events planned yet. Use “Plan event” to add your first one.
+						</div>
+					)}
+					{plannerOutfit && <OutfitCard outfit={plannerOutfit} items={wardrobeItems} />}
+					{plannerSuggestion && <SuggestionCard suggestion={plannerSuggestion} />}
 				</aside>
 			</div>
 		</section>

@@ -3,116 +3,138 @@ import { ArrowDownUp, Copy, Save, Shuffle, WandSparkles } from '@lucide/astro';
 import Layout from '../layouts/Layout.astro';
 import AppShell from '../components/layout/AppShell.astro';
 import ProductNav from '../components/layout/ProductNav.astro';
+import EmptyState from '../components/wardrobe/EmptyState.astro';
 import ItemCard from '../components/wardrobe/ItemCard.astro';
 import ItemPhoto from '../components/wardrobe/ItemPhoto.astro';
 import OutfitCard from '../components/wardrobe/OutfitCard.astro';
 import SuggestionCard from '../components/wardrobe/SuggestionCard.astro';
-import { getWardrobeViewData } from '../lib/wardrobeData';
+import { getViewDataForViewer } from '../lib/wardrobeData';
 
-const { outfits, suggestions, wardrobeItems } = await getWardrobeViewData();
-const canvasItems = outfits[0].items.map((id) => wardrobeItems.find((item) => item.id === id)).filter(Boolean);
+const { outfits, suggestions, wardrobeItems } = await getViewDataForViewer(Astro.locals.viewer);
+const hasItems = wardrobeItems.length > 0;
+const canvasOutfit = outfits[0];
+const canvasItems = canvasOutfit
+	? canvasOutfit.items.map((id) => wardrobeItems.find((item) => item.id === id)).filter(Boolean)
+	: [];
+const helperSuggestion = suggestions[1] ?? suggestions[0];
+const secondaryOutfit = outfits[1];
 ---
 
 <Layout title="Outfit Builder | Digital Wardrobe">
 	<AppShell active="/outfits" private>
 		<section class="bg-canvas-soft py-8">
 			<ProductNav active="/outfits" />
-			<div class="container-page grid gap-6 xl:grid-cols-[300px_1fr_340px]">
-				<aside class="order-2 grid content-start gap-3 rounded-lg border border-hairline bg-canvas p-4 shadow-[var(--shadow-card)] xl:order-1">
-					<div class="flex items-center justify-between">
-						<p class="font-mono text-xs text-body">ITEM PICKER</p>
-						<button
-							class="rounded-full border border-hairline px-3 py-1 text-xs text-body"
-							data-toast="Picker filters are now narrowed to ready work pieces."
-							data-track="outfit_picker_filters_opened"
-							type="button"
-						>
-							Filters
-						</button>
-					</div>
-					<div class="grid grid-cols-2 gap-3 xl:grid-cols-1">
-						{wardrobeItems.slice(0, 5).map((item) => <ItemCard item={item} />)}
-					</div>
-				</aside>
-
-				<section class="order-1 rounded-lg border border-hairline bg-canvas p-4 shadow-[var(--shadow-float)] xl:order-2">
-					<div class="flex flex-wrap items-center justify-between gap-3 border-b border-hairline pb-4">
-						<div>
-							<p class="font-mono text-xs text-body">CANVAS</p>
-							<h1 class="mt-1 text-2xl font-semibold text-ink">Soft tailoring for studio review.</h1>
-						</div>
-						<div class="flex flex-wrap gap-2">
+			{hasItems ? (
+				<div class="container-page grid gap-6 xl:grid-cols-[300px_1fr_340px]">
+					<aside class="order-2 grid content-start gap-3 rounded-lg border border-hairline bg-canvas p-4 shadow-[var(--shadow-card)] xl:order-1">
+						<div class="flex items-center justify-between">
+							<p class="font-mono text-xs text-body">ITEM PICKER</p>
 							<button
-								class="inline-flex min-h-10 items-center gap-2 rounded-full border border-hairline px-3 text-sm text-ink"
-								data-outfit-action="duplicate"
-								data-track="outfit_duplicated"
+								class="rounded-full border border-hairline px-3 py-1 text-xs text-body"
+								data-toast="Picker filters are now narrowed to ready work pieces."
+								data-track="outfit_picker_filters_opened"
 								type="button"
 							>
-								<Copy size={15} strokeWidth={1.8} />
-								Duplicate
-							</button>
-							<button
-								class="inline-flex min-h-10 items-center gap-2 rounded-full bg-ink px-3 text-sm font-medium text-white"
-								data-outfit-action="save"
-								data-track="outfit_created"
-								type="button"
-							>
-								<Save size={15} strokeWidth={1.8} />
-								Save
+								Filters
 							</button>
 						</div>
-					</div>
+						<div class="grid grid-cols-2 gap-3 xl:grid-cols-1">
+							{wardrobeItems.slice(0, 5).map((item) => <ItemCard item={item} />)}
+						</div>
+					</aside>
 
-					<div class="mt-4 grid min-h-[520px] place-items-center rounded-lg bg-canvas-soft p-4">
-						<div class="grid w-full max-w-3xl grid-cols-2 gap-4 md:grid-cols-3" data-outfit-canvas>
-							{canvasItems.map((item, index) => (
-								<div class:list={['group/card rounded-lg border border-hairline bg-canvas p-3 shadow-[var(--shadow-card)]', index === 0 && 'md:col-span-2']} data-canvas-item>
-									<ItemPhoto item={item} priority={index === 0} />
-									<div class="mt-3 flex items-center justify-between gap-2">
-										<p class="truncate text-sm font-medium text-ink">{item.name}</p>
-										<button
-											class="flex size-8 shrink-0 items-center justify-center rounded-full border border-hairline text-body"
-											data-outfit-action="reorder"
-											type="button"
-											aria-label={`Reorder ${item.name}`}
-										>
-											<ArrowDownUp size={14} strokeWidth={1.8} />
-										</button>
-									</div>
+					<section class="order-1 rounded-lg border border-hairline bg-canvas p-4 shadow-[var(--shadow-float)] xl:order-2">
+						<div class="flex flex-wrap items-center justify-between gap-3 border-b border-hairline pb-4">
+							<div>
+								<p class="font-mono text-xs text-body">CANVAS</p>
+								<h1 class="mt-1 text-2xl font-semibold text-ink">Build an outfit from your pieces.</h1>
+							</div>
+							<div class="flex flex-wrap gap-2">
+								<button
+									class="inline-flex min-h-10 items-center gap-2 rounded-full border border-hairline px-3 text-sm text-ink"
+									data-outfit-action="duplicate"
+									data-track="outfit_duplicated"
+									type="button"
+								>
+									<Copy size={15} strokeWidth={1.8} />
+									Duplicate
+								</button>
+								<button
+									class="inline-flex min-h-10 items-center gap-2 rounded-full bg-ink px-3 text-sm font-medium text-white"
+									data-outfit-action="save"
+									data-track="outfit_created"
+									type="button"
+								>
+									<Save size={15} strokeWidth={1.8} />
+									Save
+								</button>
+							</div>
+						</div>
+
+						<div class="mt-4 grid min-h-[520px] place-items-center rounded-lg bg-canvas-soft p-4">
+							{canvasItems.length > 0 ? (
+								<div class="grid w-full max-w-3xl grid-cols-2 gap-4 md:grid-cols-3" data-outfit-canvas>
+									{canvasItems.map((item, index) => (
+										<div class:list={['group/card rounded-lg border border-hairline bg-canvas p-3 shadow-[var(--shadow-card)]', index === 0 && 'md:col-span-2']} data-canvas-item>
+											<ItemPhoto item={item} priority={index === 0} />
+											<div class="mt-3 flex items-center justify-between gap-2">
+												<p class="truncate text-sm font-medium text-ink">{item.name}</p>
+												<button
+													class="flex size-8 shrink-0 items-center justify-center rounded-full border border-hairline text-body"
+													data-outfit-action="reorder"
+													type="button"
+													aria-label={`Reorder ${item.name}`}
+												>
+													<ArrowDownUp size={14} strokeWidth={1.8} />
+												</button>
+											</div>
+										</div>
+									))}
 								</div>
-							))}
+							) : (
+								<p class="max-w-sm text-center text-sm leading-6 text-body">Pick pieces from your wardrobe to start a look, then save it as an outfit.</p>
+							)}
 						</div>
-					</div>
-				</section>
+					</section>
 
-				<aside class="order-3 grid content-start gap-4">
-					<SuggestionCard suggestion={suggestions[1]} />
-					<div class="rounded-lg border border-hairline bg-canvas p-5 shadow-[var(--shadow-card)]">
-						<p class="font-mono text-xs text-body">NON-DRAG CONTROLS</p>
-						<div class="mt-4 grid gap-3">
-							<button
-								class="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-hairline bg-canvas px-4 text-sm font-medium text-ink"
-								data-outfit-action="style"
-								data-track="suggestion_viewed"
-								type="button"
-							>
-								<WandSparkles size={16} strokeWidth={1.8} />
-								Style this item
-							</button>
-							<button
-								class="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-hairline bg-canvas px-4 text-sm font-medium text-ink"
-								data-outfit-action="swap"
-								data-track="suggestion_swapped"
-								type="button"
-							>
-								<Shuffle size={16} strokeWidth={1.8} />
-								Swap one piece
-							</button>
+					<aside class="order-3 grid content-start gap-4">
+						{helperSuggestion && <SuggestionCard suggestion={helperSuggestion} />}
+						<div class="rounded-lg border border-hairline bg-canvas p-5 shadow-[var(--shadow-card)]">
+							<p class="font-mono text-xs text-body">NON-DRAG CONTROLS</p>
+							<div class="mt-4 grid gap-3">
+								<button
+									class="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-hairline bg-canvas px-4 text-sm font-medium text-ink"
+									data-outfit-action="style"
+									data-track="suggestion_viewed"
+									type="button"
+								>
+									<WandSparkles size={16} strokeWidth={1.8} />
+									Style this item
+								</button>
+								<button
+									class="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-hairline bg-canvas px-4 text-sm font-medium text-ink"
+									data-outfit-action="swap"
+									data-track="suggestion_swapped"
+									type="button"
+								>
+									<Shuffle size={16} strokeWidth={1.8} />
+									Swap one piece
+								</button>
+							</div>
 						</div>
-					</div>
-					<OutfitCard outfit={outfits[1]} items={wardrobeItems} />
-				</aside>
-			</div>
+						{secondaryOutfit && <OutfitCard outfit={secondaryOutfit} items={wardrobeItems} />}
+					</aside>
+				</div>
+			) : (
+				<div class="container-page">
+					<EmptyState
+						title="No outfits yet."
+						body="Outfits are built from your wardrobe. Add a few pieces first, then style them together here."
+						ctaLabel="Add your first item"
+						ctaEvent="dw:add-item"
+					/>
+				</div>
+			)}
 		</section>
 	</AppShell>
 </Layout>
@@ -143,11 +165,11 @@ const canvasItems = outfits[0].items.map((id) => wardrobeItems.find((item) => it
 		}
 
 		if (action === 'style') {
-			window.dispatchEvent(new CustomEvent('dw:toast', { detail: { message: 'Style helper opened: camel blazer anchors three polished variants.' } }));
+			window.dispatchEvent(new CustomEvent('dw:toast', { detail: { message: 'Style helper opened for the selected piece.' } }));
 		}
 
 		if (action === 'swap') {
-			window.dispatchEvent(new CustomEvent('dw:toast', { detail: { message: 'Swapped suggestion ready: try the sage overshirt for travel weather.' } }));
+			window.dispatchEvent(new CustomEvent('dw:toast', { detail: { message: 'Swapped suggestion ready for the current look.' } }));
 		}
 	});
 </script>

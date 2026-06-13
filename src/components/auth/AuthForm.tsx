@@ -78,16 +78,34 @@ export function AuthForm() {
 
   const completeSignIn = async (nextUser: User) => {
     setUser(nextUser)
-    const token = await nextUser.getIdToken()
-    await fetch("/api/me", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    try {
+      const token = await nextUser.getIdToken()
+      // Establishes the httpOnly session cookie (and upserts the user) so
+      // server-rendered pages can identify this account.
+      await fetch("/api/session", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      })
+    } catch {
+      // Non-fatal: the client stays signed in; server pages fall back to the gate.
+    }
     setMessage("Signed in. Opening your wardrobe.")
     window.setTimeout(() => {
       window.location.assign(redirectTarget)
     }, 500)
+  }
+
+  const handleGuest = async () => {
+    setStatus("loading")
+    setError("")
+    setMessage("")
+    try {
+      await fetch("/api/guest", { method: "POST" })
+      window.location.assign("/dashboard")
+    } catch {
+      setError("Could not start guest mode. Please try again.")
+      setStatus("idle")
+    }
   }
 
   const handleGoogleSignIn = async () => {
@@ -143,6 +161,15 @@ export function AuthForm() {
           <span className="font-mono text-xs">.env.example</span> as the template. Enable Google and Email/Password
           providers in Firebase Authentication.
         </p>
+        <Button
+          className="mt-4 h-11 w-full rounded-full bg-ink text-sm font-medium text-white hover:bg-ink/90"
+          disabled={status === "loading"}
+          onClick={handleGuest}
+          type="button"
+        >
+          Continue as guest
+        </Button>
+        <p className="mt-2 text-center text-xs leading-5 text-body">No account needed — explore a read-only sample wardrobe.</p>
       </div>
     )
   }
@@ -273,6 +300,18 @@ export function AuthForm() {
         >
           {authMode === "create" ? "Already have an account? Sign in" : "New here? Create an account"}
         </button>
+
+        <div className="mt-1 border-t border-hairline pt-3">
+          <Button
+            className="h-11 w-full rounded-full border border-hairline bg-canvas text-sm font-medium text-ink shadow-[var(--shadow-hairline)] hover:bg-canvas-soft"
+            disabled={isBusy}
+            onClick={handleGuest}
+            type="button"
+          >
+            Continue as guest
+          </Button>
+          <p className="mt-2 text-center text-xs leading-5 text-body">Explore a sample wardrobe — read-only, nothing is saved.</p>
+        </div>
       </div>
     </div>
   )

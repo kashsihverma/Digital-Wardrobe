@@ -141,6 +141,13 @@ export function UploadActions({ triggerClassName = "" }: UploadActionsProps) {
     if (videoRef.current) videoRef.current.srcObject = null
   }, [])
 
+  // Empty-state "Add your first item" buttons dispatch this event to open the dialog.
+  useEffect(() => {
+    const openDialog = () => setOpen(true)
+    window.addEventListener("dw:add-item", openDialog)
+    return () => window.removeEventListener("dw:add-item", openDialog)
+  }, [])
+
   useEffect(() => {
     if (typeof navigator === "undefined" || typeof window === "undefined") return
     setCaps({

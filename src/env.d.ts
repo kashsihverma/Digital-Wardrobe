@@ -1,5 +1,11 @@
 /// <reference types="astro/client" />
 
+declare namespace App {
+	interface Locals {
+		viewer: import("./lib/server/viewer").Viewer;
+	}
+}
+
 interface ImportMetaEnv {
 	readonly FIREBASE_PROJECT_ID?: string;
 	readonly FIREBASE_CLIENT_EMAIL?: string;
