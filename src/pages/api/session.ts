@@ -1,8 +1,8 @@
 import type { APIRoute } from "astro"
 
 import { json, upsertUserFromToken } from "@/lib/server/api"
-import { getFirebaseAdminAuth, verifyRequestUser } from "@/lib/server/firebaseAdmin"
-import { clearAuthCookies, setSessionCookie, SESSION_EXPIRES_IN_MS } from "@/lib/server/viewer"
+import { verifyRequestUser } from "@/lib/server/firebaseAdmin"
+import { clearAuthCookies, setSessionCookie, signSessionToken } from "@/lib/server/viewer"
 
 // Exchange a freshly-minted Firebase ID token for a long-lived httpOnly session
 // cookie so server-rendered pages can identify the viewer.
@@ -12,14 +12,9 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     return json({ error: auth.message }, { status: auth.status })
   }
 
-  const authorization = request.headers.get("authorization") ?? ""
-  const idToken = authorization.startsWith("Bearer ") ? authorization.slice("Bearer ".length).trim() : ""
-
   try {
     await upsertUserFromToken(auth.token)
-    const sessionCookie = await getFirebaseAdminAuth().createSessionCookie(idToken, {
-      expiresIn: SESSION_EXPIRES_IN_MS,
-    })
+    const sessionCookie = await signSessionToken(auth.token.email!, auth.token.name ?? null)
     setSessionCookie(cookies, sessionCookie)
     return json({ ok: true })
   } catch {

@@ -1,6 +1,5 @@
 import type { AstroCookies } from "astro"
-
-import { getFirebaseAdminAuth } from "./firebaseAdmin"
+import { SignJWT, jwtVerify } from "jose"
 
 export type Viewer =
   | { state: "user"; email: string; name?: string | null }
@@ -25,24 +24,45 @@ function baseOptions() {
   }
 }
 
+function getSecretKey() {
+  const secret = process.env.JWT_SECRET || "local-development-secret-key-change-me"
+  return new TextEncoder().encode(secret)
+}
+
+export async function signSessionToken(email: string, name?: string | null): Promise<string> {
+  return new SignJWT({ email, name })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime(`${SESSION_MAX_AGE}s`)
+    .sign(getSecretKey())
+}
+
+export async function verifySessionToken(token: string) {
+  try {
+    const { payload } = await jwtVerify(token, getSecretKey())
+    if (payload.email && typeof payload.email === "string") {
+      return {
+        email: payload.email,
+        name: typeof payload.name === "string" ? payload.name : null,
+      }
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
 /**
- * Resolve who is viewing from request cookies. A valid Firebase session cookie
+ * Resolve who is viewing from request cookies. A valid locally-signed JWT session cookie
  * wins; otherwise a guest cookie maps to the demo account; otherwise nobody.
- * If session verification fails (expired token, admin not configured), we fall
- * through to the guest cookie when present, else "none". This never exposes a
- * real account's data — getWardrobeViewData returns empty on any miss, and only
- * getDemoViewData (guest/landing) serves demo content.
+ * We no longer contact Firebase servers on every request, making page loads much faster.
  */
 export async function resolveViewer(cookies: AstroCookies): Promise<Viewer> {
   const session = cookies.get(SESSION_COOKIE)?.value
   if (session) {
-    try {
-      const decoded = await getFirebaseAdminAuth().verifySessionCookie(session)
-      if (decoded.email) {
-        return { state: "user", email: decoded.email, name: decoded.name ?? null }
-      }
-    } catch {
-      // Invalid/expired cookie or admin not configured — fall through.
+    const decoded = await verifySessionToken(session)
+    if (decoded) {
+      return { state: "user", email: decoded.email, name: decoded.name }
     }
   }
 

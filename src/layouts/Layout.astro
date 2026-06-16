@@ -4,11 +4,17 @@ import '../styles/global.css';
 interface Props {
 	title?: string;
 	description?: string;
+	keywords?: string;
+	ogImage?: string;
+	ogType?: string;
 }
 
 const {
-	title = 'Digital Wardrobe',
-	description = 'A private wardrobe operating system for capturing garments, building outfits, planning events, and understanding what you actually wear.',
+	title = 'Digital Wardrobe | Private Outfit & Closet Organizer',
+	description = 'Optimize your style with Digital Wardrobe. Build outfits, plan events, track cost-per-wear, and design your digital closet privately.',
+	keywords = 'Digital Wardrobe, wardrobe-closet, digital wardrobe app, online closet design, wardrobe closet, closet wardrobe, online closet design tool, online closet systems, online closet design tool free, free online closet design tool, online closet, online closet designer',
+	ogImage = '/apple-touch-icon.png',
+	ogType = 'website',
 } = Astro.props;
 
 const viewerState = Astro.locals.viewer?.state ?? 'none';
@@ -21,7 +27,28 @@ const viewerState = Astro.locals.viewer?.state ?? 'none';
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
 		<meta name="description" content={description} />
+		<meta name="keywords" content={keywords} />
 		<title>{title}</title>
+		
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content={ogType} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:image" content={new URL(ogImage, Astro.url)} />
+		<meta property="og:url" content={Astro.url} />
+
+		<!-- Twitter -->
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={new URL(ogImage, Astro.url)} />
+
+		<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="shortcut icon" href="/favicon.ico" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+		<meta name="apple-mobile-web-app-title" content="Wardrobe" />
+		<link rel="manifest" href="/site.webmanifest" />
 	</head>
 	<body>
 		<slot />

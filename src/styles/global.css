@@ -150,12 +150,12 @@ filter-chips [aria-pressed="false"] {
 	color: var(--color-body);
 }
 
-html:not([data-dw-auth="signed-in"]) [data-private-content="true"] {
+html:not([data-dw-auth="signed-in"]):not([data-dw-viewer="guest"]) [data-private-content="true"] {
 	visibility: hidden;
 	pointer-events: none;
 }
 
-html:not([data-dw-auth="signed-in"]) [data-private-nav="true"] {
+html:not([data-dw-auth="signed-in"]):not([data-dw-viewer="guest"]) [data-private-nav="true"] {
 	display: none;
 }
 
