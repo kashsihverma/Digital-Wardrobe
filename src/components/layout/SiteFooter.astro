@@ -1,9 +1,37 @@
 ---
 const columns = [
-	{ title: 'Product', links: ['Wardrobe', 'Outfits', 'Planner', 'Discover'] },
-	{ title: 'System', links: ['Privacy', 'Auto-tagging', 'Calendar', 'Export'] },
-	{ title: 'Guides', links: ['Capsules', 'Declutter', 'Packing', 'Cost per wear'] },
-	{ title: 'Company', links: ['About', 'Security', 'Updates', 'Contact'] },
+	{
+		title: 'Product',
+		links: [
+			{ label: 'Wardrobe', href: '/wardrobe' },
+			{ label: 'Outfits', href: '/outfits' },
+			{ label: 'Planner', href: '/planner' },
+			{ label: 'Discover', href: '/discover' },
+		]
+	},
+	{
+		title: 'System',
+		links: [
+			{ label: 'Privacy Policy', href: '/privacy' },
+			{ label: 'Terms & Conditions', href: '/terms' },
+			{ label: 'Settings', href: '/settings' },
+		]
+	},
+	{
+		title: 'Guides',
+		links: [
+			{ label: 'Capsules', href: '/discover' },
+			{ label: 'Declutter', href: '/insights' },
+			{ label: 'Cost per wear', href: '/insights' },
+		]
+	},
+	{
+		title: 'Company',
+		links: [
+			{ label: 'About Us', href: '/about' },
+			{ label: 'Contact Us', href: '/contact' },
+		]
+	},
 ];
 ---
 
@@ -21,7 +49,7 @@ const columns = [
 					<p class="font-mono text-xs text-mute">{column.title}</p>
 					<div class="mt-4 grid gap-2">
 						{column.links.map((link) => (
-							<a class="text-sm text-body transition hover:text-ink" href="/settings">{link}</a>
+							<a class="text-sm text-body transition hover:text-ink" href={link.href}>{link.label}</a>
 						))}
 					</div>
 				</div>

@@ -1,0 +1,52 @@
+---
+import Layout from '../layouts/Layout.astro';
+import AppShell from '../components/layout/AppShell.astro';
+---
+
+<Layout title="About Us | Digital Wardrobe">
+	<AppShell active="/about">
+		<section class="bg-canvas-soft py-16">
+			<div class="container-page max-w-4xl">
+				<p class="font-mono text-xs text-body mb-3 uppercase tracking-wider">Our story & philosophy</p>
+				<h1 class="text-4xl font-semibold leading-10 tracking-tight text-ink md:text-5xl md:leading-[56px] mb-8">
+					Visualizing a calmer way to get dressed.
+				</h1>
+				
+				<div class="prose max-w-none text-base leading-8 text-body space-y-6">
+					<p class="text-lg leading-9 text-ink font-medium">
+						Digital Wardrobe was born out of a simple frustration: the clutter of modern consumption and the noise of online shopping. We believe your wardrobe should bring clarity to your day, not friction.
+					</p>
+					
+					<p>
+						Traditional closet management relies on physical space that easily gets unorganized. By digitizing your garments, you create a virtual dashboard that gives you a birds-eye view of everything you own. Our platform helps you make the most of your current wardrobe, plan look layouts for upcoming events, and track garment lifecycle metrics such as cost-per-wear.
+					</p>
+
+					<div class="grid gap-6 my-10 md:grid-cols-2">
+						<div class="rounded-lg border border-hairline bg-canvas p-6 shadow-[var(--shadow-card)]">
+							<h3 class="text-lg font-semibold text-ink mb-2">Sustainable styling</h3>
+							<p class="text-sm leading-6 text-body">
+								We believe the most sustainable garment is the one you already own. By highlighting underused items and assisting with outfit coordination, we help you buy less and style more.
+							</p>
+						</div>
+						
+						<div class="rounded-lg border border-hairline bg-canvas p-6 shadow-[var(--shadow-card)]">
+							<h3 class="text-lg font-semibold text-ink mb-2">Privacy by default</h3>
+							<p class="text-sm leading-6 text-body">
+								Your photos, styling history, and calendar events are personal. Our architecture keeps everything private by default, leveraging local secure sessions so that your visual closet remains strictly yours.
+							</p>
+						</div>
+					</div>
+
+					<h2 class="text-2xl font-semibold text-ink mt-8 mb-4">Our approach to design.</h2>
+					<p>
+						Our interface is intentionally quiet. We avoid e-commerce noise, flashing notifications, or pressure to buy. Instead, we present a stark, high-contrast canvas where your garments are the focus. Every grid border, label spacing, and dark-band layout is crafted to support creative focus and ease of mind.
+					</p>
+					
+					<p>
+						Whether you're curating a tight capsule wardrobe or organizing a sprawling physical closet, Digital Wardrobe provides the structure and data to make styling deliberate, calm, and satisfying.
+					</p>
+				</div>
+			</div>
+		</section>
+	</AppShell>
+</Layout>

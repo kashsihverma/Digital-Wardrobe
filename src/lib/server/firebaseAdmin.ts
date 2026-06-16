@@ -1,37 +1,20 @@
-import "dotenv/config"
+import { createRemoteJWKSet, jwtVerify } from "jose"
 
-import { cert, getApps, initializeApp } from "firebase-admin/app"
-import { getAuth, type DecodedIdToken } from "firebase-admin/auth"
+export interface DecodedIdToken {
+  uid: string
+  email?: string
+  name?: string
+  picture?: string
+  [key: string]: any
+}
 
 type AuthResult =
   | { ok: true; token: DecodedIdToken }
   | { ok: false; status: number; message: string }
 
-function getPrivateKey() {
-  return process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n")
-}
-
-function hasAdminConfig() {
-  return Boolean(process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && getPrivateKey())
-}
-
-export function getFirebaseAdminAuth() {
-  if (!hasAdminConfig()) {
-    throw new Error("Firebase Admin is not configured.")
-  }
-
-  if (!getApps().length) {
-    initializeApp({
-      credential: cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: getPrivateKey(),
-      }),
-    })
-  }
-
-  return getAuth()
-}
+const JWKS = createRemoteJWKSet(
+  new URL("https://www.googleapis.com/service_accounts/v1/jwk/securetoken-system@system.gserviceaccount.com")
+)
 
 export async function verifyRequestUser(request: Request): Promise<AuthResult> {
   const authorization = request.headers.get("authorization")
@@ -41,14 +24,28 @@ export async function verifyRequestUser(request: Request): Promise<AuthResult> {
     return { ok: false, status: 401, message: "Missing Firebase ID token." }
   }
 
+  const projectId = process.env.FIREBASE_PROJECT_ID || import.meta.env.PUBLIC_FIREBASE_PROJECT_ID
+
+  if (!projectId) {
+    return { ok: false, status: 501, message: "Firebase Project ID is not configured on the server." }
+  }
+
   try {
-    const decoded = await getFirebaseAdminAuth().verifyIdToken(token)
+    const { payload } = await jwtVerify(token, JWKS, {
+      issuer: `https://securetoken.google.com/${projectId}`,
+      audience: projectId,
+    })
+
+    const decoded: DecodedIdToken = {
+      uid: payload.sub!,
+      email: payload.email as string | undefined,
+      name: payload.name as string | undefined,
+      picture: payload.picture as string | undefined,
+      ...payload,
+    }
+
     return { ok: true, token: decoded }
   } catch (error) {
-    const message = error instanceof Error && error.message.includes("not configured")
-      ? "Firebase Admin is not configured on the server."
-      : "Invalid or expired Firebase ID token."
-
-    return { ok: false, status: message.includes("configured") ? 501 : 401, message }
+    return { ok: false, status: 401, message: "Invalid or expired Firebase ID token." }
   }
 }

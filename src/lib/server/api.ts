@@ -1,4 +1,4 @@
-import type { DecodedIdToken } from "firebase-admin/auth"
+import type { DecodedIdToken } from "./firebaseAdmin"
 
 import { prisma } from "@/lib/prisma"
 import { verifyRequestUser } from "./firebaseAdmin"

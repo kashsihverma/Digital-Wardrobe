@@ -30,6 +30,16 @@ const viewerState = Astro.locals.viewer?.state ?? 'none';
 		<meta name="keywords" content={keywords} />
 		<title>{title}</title>
 		
+		<!-- Google tag (gtag.js) -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-J20PVLS3SL" is:inline></script>
+		<script is:inline>
+			window.dataLayer = window.dataLayer || [];
+			function gtag(){dataLayer.push(arguments);}
+			gtag('js', new Date());
+
+			gtag('config', 'G-J20PVLS3SL');
+		</script>
+		
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content={ogType} />
 		<meta property="og:title" content={title} />

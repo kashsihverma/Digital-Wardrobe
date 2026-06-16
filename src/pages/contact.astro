@@ -1,0 +1,118 @@
+---
+import Layout from '../layouts/Layout.astro';
+import AppShell from '../components/layout/AppShell.astro';
+import { Mail, ShieldCheck } from '@lucide/astro';
+---
+
+<Layout title="Contact Us | Digital Wardrobe">
+	<AppShell active="/contact">
+		<section class="bg-canvas-soft py-16">
+			<div class="container-page max-w-5xl">
+				<p class="font-mono text-xs text-body mb-3 uppercase tracking-wider">Get in touch</p>
+				<h1 class="text-4xl font-semibold leading-10 tracking-tight text-ink md:text-5xl md:leading-[56px] mb-12">
+					We'd love to hear from you.
+				</h1>
+				
+				<div class="grid gap-12 lg:grid-cols-[1fr_1.3fr]">
+					<!-- Contact Info Column -->
+					<div class="space-y-8">
+						<p class="text-base leading-7 text-body">
+							Have questions about organizing your closet, planning outfits, or how our local security keys work? Our support desk is here to help.
+						</p>
+						
+						<div class="space-y-6">
+							<div class="flex items-start gap-4">
+								<div class="flex size-10 shrink-0 items-center justify-center rounded-full border border-hairline bg-canvas text-ink shadow-[var(--shadow-card)]">
+									<Mail size={16} stroke-width={1.8} />
+								</div>
+								<div>
+									<p class="text-sm font-semibold text-ink">General support & inquiries</p>
+									<a href="mailto:support@wardrobe-closet.com" class="text-sm text-link hover:underline">support@wardrobe-closet.com</a>
+								</div>
+							</div>
+							
+							<div class="flex items-start gap-4">
+								<div class="flex size-10 shrink-0 items-center justify-center rounded-full border border-hairline bg-canvas text-ink shadow-[var(--shadow-card)]">
+									<ShieldCheck size={16} stroke-width={1.8} />
+								</div>
+								<div>
+									<p class="text-sm font-semibold text-ink">Data protection & privacy officer</p>
+									<a href="mailto:privacy@wardrobe-closet.com" class="text-sm text-link hover:underline">privacy@wardrobe-closet.com</a>
+								</div>
+							</div>
+						</div>
+						
+						<div class="rounded-lg border border-hairline bg-canvas p-6 shadow-[var(--shadow-card)]">
+							<p class="text-sm font-semibold text-ink">Private by design</p>
+							<p class="mt-2 text-xs leading-5 text-body">
+								Any information you send us remains strictly confidential. We never sell your data, use tracking cookie IDs, or share your inquiries with third-party platforms.
+							</p>
+						</div>
+					</div>
+					
+					<!-- Form Column -->
+					<div class="rounded-lg border border-hairline bg-canvas p-8 shadow-[var(--shadow-card)]">
+						<form class="space-y-5" onsubmit="event.preventDefault(); alert('Message sent successfully!');">
+							<div>
+								<label for="name" class="block text-xs font-medium text-body mb-2">Name</label>
+								<input 
+									type="text" 
+									id="name" 
+									name="name" 
+									required 
+									placeholder="Your name"
+									class="w-full bg-canvas text-ink border border-hairline rounded-sm px-4 h-10 text-sm focus:outline-none focus:border-hairline-strong transition shadow-[var(--shadow-hairline)]"
+								/>
+							</div>
+							
+							<div>
+								<label for="email" class="block text-xs font-medium text-body mb-2">Email address</label>
+								<input 
+									type="email" 
+									id="email" 
+									name="email" 
+									required 
+									placeholder="you@example.com"
+									class="w-full bg-canvas text-ink border border-hairline rounded-sm px-4 h-10 text-sm focus:outline-none focus:border-hairline-strong transition shadow-[var(--shadow-hairline)]"
+								/>
+							</div>
+							
+							<div>
+								<label for="subject" class="block text-xs font-medium text-body mb-2">Subject</label>
+								<input 
+									type="text" 
+									id="subject" 
+									name="subject" 
+									required 
+									placeholder="How can we help?"
+									class="w-full bg-canvas text-ink border border-hairline rounded-sm px-4 h-10 text-sm focus:outline-none focus:border-hairline-strong transition shadow-[var(--shadow-hairline)]"
+								/>
+							</div>
+							
+							<div>
+								<label for="message" class="block text-xs font-medium text-body mb-2">Message</label>
+								<textarea 
+									id="message" 
+									name="message" 
+									required 
+									rows="5"
+									placeholder="Tell us details..."
+									class="w-full bg-canvas text-ink border border-hairline rounded-sm px-4 py-3 text-sm focus:outline-none focus:border-hairline-strong transition shadow-[var(--shadow-hairline)] resize-y min-h-[120px]"
+								></textarea>
+							</div>
+							
+							<div class="pt-2">
+								<button 
+									type="submit"
+									class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-ink px-5 text-sm font-medium text-white transition hover:bg-ink/90 cursor-pointer"
+								>
+									Send message
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</section>
+	</AppShell>
+</Layout>

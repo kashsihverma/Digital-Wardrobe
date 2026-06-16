@@ -1,0 +1,64 @@
+---
+import Layout from '../layouts/Layout.astro';
+import AppShell from '../components/layout/AppShell.astro';
+---
+
+<Layout title="Privacy Policy | Digital Wardrobe">
+	<AppShell active="/privacy">
+		<section class="bg-canvas-soft py-16">
+			<div class="container-page max-w-3xl">
+				<p class="font-mono text-xs text-body mb-3 uppercase tracking-wider">Legal & security</p>
+				<h1 class="text-4xl font-semibold leading-10 tracking-tight text-ink md:text-5xl md:leading-[56px] mb-8">
+					Privacy policy.
+				</h1>
+				
+				<div class="prose max-w-none text-sm leading-7 text-body space-y-6">
+					<p class="text-base text-ink font-medium">
+						Last updated: June 17, 2026
+					</p>
+					
+					<p>
+						At Digital Wardrobe, we take your privacy extremely seriously. We believe that your wardrobe, your photos, and your daily schedule are personal. Our software is designed to prioritize data privacy and user control from the ground up.
+					</p>
+
+					<h2 class="text-xl font-semibold text-ink mt-8 mb-3">1. Information we collect</h2>
+					<p>
+						When you use Digital Wardrobe, your data (garment photos, tags, metadata, outfit canvases, and calendar details) is stored securely. If you use our local session mode (guest mode), all item information remains local to your browser session. If you sign in, your session is verified using standard, edge-compatible JSON Web Tokens (JWT) stored in a secure cookie.
+					</p>
+
+					<h2 class="text-xl font-semibold text-ink mt-8 mb-3">2. How your data is used</h2>
+					<p>
+						Your data is used solely to deliver the service, including:
+					</p>
+					<ul class="list-disc list-inside pl-4 space-y-1">
+						<li>Displaying your digital wardrobe grid.</li>
+						<li>Calculating closet insights (such as cost-per-wear and wear frequency).</li>
+						<li>Suggesting outfit pairings and planning upcoming calendar events.</li>
+					</ul>
+					<p>
+						We do not run external tracking scripts, nor do we sell or monetize your garment photos or data to third-party advertising companies.
+					</p>
+
+					<h2 class="text-xl font-semibold text-ink mt-8 mb-3">3. Storage & security</h2>
+					<p>
+						All file uploads are processed securely. Our session tokens are signed locally using secure web encryption keys to protect your account. You can sign out or clear your cookies at any time to remove your session data completely.
+					</p>
+
+					<h2 class="text-xl font-semibold text-ink mt-8 mb-3">4. Cookies</h2>
+					<p>
+						We use only essential cookies required for session authentication (login status). We do not use advertising or tracking cookies.
+					</p>
+
+					<h2 class="text-xl font-semibold text-ink mt-8 mb-3">5. Your rights & control</h2>
+					<p>
+						You retain full copyright and ownership of all photos you upload to Digital Wardrobe. You can export or delete your wardrobe data at any time from your settings panel.
+					</p>
+
+					<p class="mt-8 text-xs text-mute border-t border-hairline pt-6">
+						If you have any questions about this Privacy Policy, please contact us at privacy@wardrobe-closet.com.
+					</p>
+				</div>
+			</div>
+		</section>
+	</AppShell>
+</Layout>
