@@ -10,6 +10,9 @@
     "directory": "./dist",
     "binding": "ASSETS"
   },
+  "vars": {
+    "FIREBASE_PROJECT_ID": "digital-wardrobe-bec23"
+  },
   "observability": {
     "enabled": true
   }
