@@ -88,7 +88,8 @@ async function loadUserData(email: string): Promise<ViewData | null> {
       suggestions: user.suggestions.map(({ title, reason, tag }) => ({ title, reason, tag })),
       insights: user.insights.map(({ label, value, detail }) => ({ label, value, detail })),
     }
-  } catch {
+  } catch (error) {
+    console.error("loadUserData exception:", error)
     return null
   }
 }
