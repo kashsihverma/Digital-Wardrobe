@@ -34,6 +34,7 @@ export async function verifyRequestUser(request: Request): Promise<AuthResult> {
     const { payload } = await jwtVerify(token, JWKS, {
       issuer: `https://securetoken.google.com/${projectId}`,
       audience: projectId,
+      clockTolerance: "60s",
     })
 
     const decoded: DecodedIdToken = {
@@ -46,6 +47,7 @@ export async function verifyRequestUser(request: Request): Promise<AuthResult> {
 
     return { ok: true, token: decoded }
   } catch (error) {
+    console.error("Firebase ID Token verification error:", error, { projectId })
     return { ok: false, status: 401, message: "Invalid or expired Firebase ID token." }
   }
 }
