@@ -24,6 +24,11 @@ export default defineConfig({
 				'@prisma/client$': path.resolve(__dirname, './node_modules/.prisma/client/wasm.js'),
 			},
 		},
+		server: {
+			watch: {
+				ignored: ['**/.wrangler/**'],
+			},
+		},
 		ssr: {
 			noExternal: ['@prisma/client'],
 		},

@@ -1,0 +1,72 @@
+---
+import { Calendar, Plus, Shirt, Upload } from '@lucide/astro';
+---
+
+<details class="group quick-actions-details fixed bottom-24 right-6 z-50 lg:hidden">
+	<summary class="flex size-14 list-none items-center justify-center rounded-full bg-ink text-white shadow-[var(--shadow-float)] outline-none cursor-pointer select-none active:scale-95 transition-transform" aria-label="Quick actions menu">
+		<Plus class="size-6 transition-transform duration-200 group-open:rotate-45" aria-hidden="true" />
+	</summary>
+	
+	<div class="fixed inset-0 z-40 bg-ink/20 opacity-0 transition-opacity duration-200 pointer-events-none group-open:opacity-100 group-open:pointer-events-auto" data-quick-overlay="true"></div>
+	
+	<div class="absolute bottom-16 right-0 z-50 w-48 rounded-lg border border-hairline bg-canvas p-2 shadow-[var(--shadow-float)] animate-in fade-in slide-in-from-bottom-2 duration-150">
+		<div class="grid gap-1">
+			<button class="flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-sm text-body hover:bg-canvas-soft hover:text-ink active:bg-canvas-soft transition cursor-pointer" data-action="add-item" type="button">
+				<Upload class="size-4 text-mute" aria-hidden="true" />
+				Add item
+			</button>
+			<a class="flex items-center gap-3 rounded-md px-3 py-3 text-sm text-body hover:bg-canvas-soft hover:text-ink active:bg-canvas-soft transition" href="/outfits">
+				<Shirt class="size-4 text-mute" aria-hidden="true" />
+				Build outfit
+			</a>
+			<a class="flex items-center gap-3 rounded-md px-3 py-3 text-sm text-body hover:bg-canvas-soft hover:text-ink active:bg-canvas-soft transition" href="/planner?action=new">
+				<Calendar class="size-4 text-mute" aria-hidden="true" />
+				Plan event
+			</a>
+		</div>
+	</div>
+</details>
+
+<style>
+	/* Hide default details disclosure triangle */
+	.quick-actions-details summary::-webkit-details-marker {
+		display: none;
+	}
+	.quick-actions-details summary {
+		list-style: none;
+	}
+</style>
+
+<script>
+	const details = document.querySelector<HTMLDetailsElement>('details.quick-actions-details');
+	if (details) {
+		const overlay = details.querySelector<HTMLElement>('[data-quick-overlay]');
+		
+		overlay?.addEventListener('click', (event) => {
+			event.preventDefault();
+			event.stopPropagation();
+			if (details.open) {
+				details.open = false;
+			}
+		});
+
+		document.addEventListener('click', (event) => {
+			const target = event.target as HTMLElement;
+			if (!details.contains(target) && details.open) {
+				details.open = false;
+			}
+		});
+
+		document.addEventListener('keydown', (event) => {
+			if (event.key === 'Escape' && details.open) {
+				details.open = false;
+				details.querySelector('summary')?.focus();
+			}
+		});
+
+		details.querySelector('[data-action="add-item"]')?.addEventListener('click', () => {
+			details.open = false;
+			window.dispatchEvent(new CustomEvent('dw:add-item'));
+		});
+	}
+</script>

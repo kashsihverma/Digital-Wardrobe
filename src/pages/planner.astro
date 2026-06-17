@@ -97,4 +97,10 @@ const plannerSuggestion = suggestions[1] ?? suggestions[0];
 			</div>
 		</section>
 	</AppShell>
+<script>
+	// Auto-open planner panel if requested in URL parameter or hash
+	if (window.location.search.includes('action=new') || window.location.hash === '#planner-event-panel') {
+		document.getElementById('planner-event-panel')?.removeAttribute('hidden');
+	}
+</script>
 </Layout>

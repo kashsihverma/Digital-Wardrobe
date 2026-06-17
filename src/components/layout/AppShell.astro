@@ -4,11 +4,24 @@ import SiteHeader from './SiteHeader.astro';
 import InteractionLayer from './InteractionLayer.astro';
 import PrivateAccessGate from '../auth/PrivateAccessGate';
 import { productNav } from '../../data/wardrobe';
+import MobileQuickActions from './MobileQuickActions.astro';
+import { Calendar, Compass, Layers, LayoutDashboard, Shirt, Menu, LogOut, BookOpen, TrendingUp, Settings } from '@lucide/astro';
 
 const { active = '/', private: isPrivate = false } = Astro.props;
+
+const iconMap = {
+	'/dashboard': LayoutDashboard,
+	'/wardrobe': Shirt,
+	'/outfits': Layers,
+	'/planner': Calendar,
+	'/discover': Compass,
+	'/collections': BookOpen,
+	'/insights': TrendingUp,
+	'/settings': Settings,
+};
 ---
 
-<SiteHeader active={active} />
+<SiteHeader active={active} isPrivate={isPrivate} />
 <main class="pb-36 lg:pb-0" data-private-content={isPrivate ? 'true' : undefined}>
 	<slot />
 </main>
@@ -18,12 +31,149 @@ const { active = '/', private: isPrivate = false } = Astro.props;
 	<>
 		<div class="pointer-events-none fixed inset-x-0 bottom-0 z-40 h-28 bg-canvas-soft/95 backdrop-blur lg:hidden" data-private-nav="true" aria-hidden="true"></div>
 		<nav class="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-50 grid grid-cols-5 rounded-full border border-hairline bg-canvas/95 p-1 text-xs shadow-[var(--shadow-float)] backdrop-blur lg:hidden" data-private-nav="true" aria-label="Mobile primary navigation">
-			{productNav.slice(0, 5).map((item) => (
-				<a class:list={['rounded-full px-2 py-2 text-center text-body', active === item.href && 'bg-ink text-white']} href={item.href}>
-					{item.label}
-				</a>
-			))}
+			{productNav.slice(0, 4).map((item) => {
+				const Icon = iconMap[item.href as keyof typeof iconMap];
+				return (
+					<a
+						class:list={[
+							'flex flex-col items-center gap-1 rounded-full py-1.5 text-center text-[10px] transition active:scale-95',
+							active === item.href ? 'text-ink font-semibold' : 'text-body hover:text-ink',
+						]}
+						href={item.href}
+					>
+						{Icon && <Icon size={18} stroke-width={1.8} aria-hidden="true" />}
+						<span>{item.label}</span>
+					</a>
+				);
+			})}
+			
+			<details class="group mobile-more-details contents">
+				<summary class="flex flex-col items-center gap-1 rounded-full py-1.5 text-center text-[10px] transition active:scale-95 text-body hover:text-ink cursor-pointer list-none select-none outline-none" aria-label="More menu">
+					<Menu size={18} stroke-width={1.8} aria-hidden="true" />
+					<span>More</span>
+				</summary>
+				
+				<div class="fixed inset-0 z-40 bg-ink/35 opacity-0 transition-opacity duration-200 pointer-events-none group-open:opacity-100 group-open:pointer-events-auto" data-more-overlay="true"></div>
+				
+				<div class="fixed inset-x-0 bottom-0 z-50 rounded-t-[20px] border-t border-hairline bg-canvas p-5 pb-[calc(1.5rem+max(0.75rem,env(safe-area-inset-bottom)))] shadow-[var(--shadow-float)] transition-transform duration-300 translate-y-full group-open:translate-y-0 more-sheet-content">
+					<div class="mx-auto mb-4 h-1 w-12 rounded-full bg-hairline" aria-hidden="true"></div>
+					<p class="font-mono text-[10px] tracking-wider text-mute mb-3 uppercase text-left">Explore Closet</p>
+					<div class="grid gap-1 text-left">
+						{productNav.slice(4).map((item) => {
+							const Icon = iconMap[item.href as keyof typeof iconMap] || Menu;
+							return (
+								<a
+									class:list={[
+										'flex items-center gap-3 rounded-lg px-3 py-3 text-sm transition',
+										active === item.href ? 'bg-canvas-soft text-ink font-medium' : 'text-body hover:text-ink hover:bg-canvas-soft'
+									]}
+									href={item.href}
+								>
+									<Icon size={16} stroke-width={1.8} aria-hidden="true" />
+									<span>{item.label}</span>
+								</a>
+							);
+						})}
+						
+						<div class="my-2 border-t border-hairline"></div>
+						
+						<button
+							class="hidden flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm text-error hover:bg-error-soft/35 active:bg-error-soft/35 transition cursor-pointer"
+							data-more-action="sign-out"
+							type="button"
+						>
+							<LogOut size={16} stroke-width={1.8} aria-hidden="true" />
+							<span>Sign out</span>
+						</button>
+						<button
+							class="hidden flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm text-ink hover:bg-canvas-soft transition cursor-pointer"
+							data-more-action="exit-guest"
+							type="button"
+						>
+							<LogOut size={16} stroke-width={1.8} aria-hidden="true" />
+							<span>Exit guest mode</span>
+						</button>
+					</div>
+				</div>
+			</details>
 		</nav>
+		<MobileQuickActions />
 	</>
 )}
 <InteractionLayer />
+
+<style is:global>
+	.mobile-more-details summary::-webkit-details-marker {
+		display: none;
+	}
+	.mobile-more-details summary {
+		list-style: none;
+	}
+	details.mobile-more-details[open] .more-sheet-content {
+		transform: translateY(0);
+	}
+</style>
+
+<script>
+	import { getFirebaseAuth } from '@/lib/firebase';
+	import { signOut } from 'firebase/auth';
+
+	const details = document.querySelector<HTMLDetailsElement>('details.mobile-more-details');
+	const overlay = document.querySelector<HTMLElement>('[data-more-overlay]');
+	const signOutBtn = document.querySelector<HTMLButtonElement>('[data-more-action="sign-out"]');
+	const exitGuestBtn = document.querySelector<HTMLButtonElement>('[data-more-action="exit-guest"]');
+
+	if (details) {
+		const viewerState = document.documentElement.dataset.dwViewer || 'none';
+		if (viewerState === 'user' && signOutBtn) {
+			signOutBtn.classList.remove('hidden');
+		} else if (viewerState === 'guest' && exitGuestBtn) {
+			exitGuestBtn.classList.remove('hidden');
+		}
+
+		overlay?.addEventListener('click', () => {
+			if (details.open) {
+				details.open = false;
+			}
+		});
+
+		document.addEventListener('keydown', (event) => {
+			if (event.key === 'Escape' && details.open) {
+				details.open = false;
+				details.querySelector('summary')?.focus();
+			}
+		});
+
+		const clearServerSession = async () => {
+			try {
+				await fetch('/api/session', { method: 'DELETE' });
+			} catch {
+				// ignore
+			}
+			try {
+				window.sessionStorage.removeItem('dw:session-synced');
+			} catch {
+				// ignore
+			}
+		};
+
+		signOutBtn?.addEventListener('click', async () => {
+			details.open = false;
+			await clearServerSession();
+			try {
+				const auth = await getFirebaseAuth();
+				await signOut(auth);
+			} catch {
+				// ignore
+			}
+			window.dispatchEvent(new CustomEvent('dw:toast', { detail: { message: 'Signed out of Digital Wardrobe.' } }));
+			window.location.assign('/');
+		});
+
+		exitGuestBtn?.addEventListener('click', async () => {
+			details.open = false;
+			await clearServerSession();
+			window.location.assign('/');
+		});
+	}
+</script>

@@ -3,7 +3,7 @@ import { productNav } from '../../data/wardrobe';
 const { active = '/' } = Astro.props;
 ---
 
-<nav class="container-page -mt-2 flex gap-2 overflow-x-auto pb-4 pt-2 text-sm" aria-label="Product sections">
+<nav class="container-page -mt-2 hidden lg:flex gap-2 overflow-x-auto pb-4 pt-2 text-sm" aria-label="Product sections">
 	{productNav.map((item) => (
 		<a
 			class:list={[

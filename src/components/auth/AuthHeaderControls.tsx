@@ -17,6 +17,7 @@ type Props = {
   active?: string
   nav: NavItem[]
   initialViewerState?: string
+  isPrivate?: boolean
 }
 
 const publicNav = [
@@ -24,7 +25,7 @@ const publicNav = [
   { href: "/#privacy", label: "Privacy" },
 ]
 
-export function AuthHeaderControls({ active = "/", nav, initialViewerState = "none" }: Props) {
+export function AuthHeaderControls({ active = "/", nav, initialViewerState = "none", isPrivate = false }: Props) {
   const [ready, setReady] = useState(!hasFirebaseConfig())
   const [user, setUser] = useState<User | null>(null)
   const [viewerState, setViewerState] = useState(initialViewerState)
@@ -157,39 +158,41 @@ export function AuthHeaderControls({ active = "/", nav, initialViewerState = "no
         )}
       </div>
 
-      <details className="group relative lg:hidden">
-        <summary className="flex size-10 list-none items-center justify-center rounded-full border border-hairline bg-canvas text-ink" aria-label="Open menu">
-          <Menu className="size-5" aria-hidden="true" />
-        </summary>
-        <div className="absolute right-0 mt-3 w-[min(calc(100vw-32px),340px)] rounded-lg border border-hairline bg-canvas p-2 shadow-[var(--shadow-float)]">
-          <nav className="grid gap-1" aria-label="Mobile navigation">
-            {navItems.map((item) => (
-              <a className={`rounded-lg px-3 py-2 text-sm text-body ${active === item.href ? "bg-canvas-soft text-ink" : ""}`} href={item.href} key={item.href}>
-                {item.label}
-              </a>
-            ))}
-            {!user ? (
-              <a className="rounded-lg bg-ink px-3 py-2 text-sm font-medium text-white" href="/sign-in">
-                {isGuest ? "Sign in to save" : "Sign in"}
-              </a>
+      {!isPrivate && (
+        <details className="group relative lg:hidden">
+          <summary className="flex size-10 list-none items-center justify-center rounded-full border border-hairline bg-canvas text-ink" aria-label="Open menu">
+            <Menu className="size-5" aria-hidden="true" />
+          </summary>
+          <div className="absolute right-0 mt-3 w-[min(calc(100vw-32px),340px)] rounded-lg border border-hairline bg-canvas p-2 shadow-[var(--shadow-float)]">
+            <nav className="grid gap-1" aria-label="Mobile navigation">
+              {navItems.map((item) => (
+                <a className={`rounded-lg px-3 py-2 text-sm text-body ${active === item.href ? "bg-canvas-soft text-ink" : ""}`} href={item.href} key={item.href}>
+                  {item.label}
+                </a>
+              ))}
+              {!user ? (
+                <a className="rounded-lg bg-ink px-3 py-2 text-sm font-medium text-white" href="/sign-in">
+                  {isGuest ? "Sign in to save" : "Sign in"}
+                </a>
+              ) : null}
+            </nav>
+            {user ? (
+              <div className="mt-2 grid gap-2 border-t border-hairline pt-2">
+                <UploadActions triggerClassName="w-full justify-start rounded-lg bg-canvas px-3 text-ink hover:bg-canvas-soft" />
+                <button className="rounded-lg border border-hairline px-3 py-2 text-left text-sm font-medium text-ink" onClick={handleSignOut} type="button">
+                  Sign out
+                </button>
+              </div>
+            ) : isGuest ? (
+              <div className="mt-2 grid gap-2 border-t border-hairline pt-2">
+                <button className="rounded-lg border border-hairline px-3 py-2 text-left text-sm font-medium text-ink" onClick={handleExitGuest} type="button">
+                  Exit guest mode
+                </button>
+              </div>
             ) : null}
-          </nav>
-          {user ? (
-            <div className="mt-2 grid gap-2 border-t border-hairline pt-2">
-              <UploadActions triggerClassName="w-full justify-start rounded-lg bg-canvas px-3 text-ink hover:bg-canvas-soft" />
-              <button className="rounded-lg border border-hairline px-3 py-2 text-left text-sm font-medium text-ink" onClick={handleSignOut} type="button">
-                Sign out
-              </button>
-            </div>
-          ) : isGuest ? (
-            <div className="mt-2 grid gap-2 border-t border-hairline pt-2">
-              <button className="rounded-lg border border-hairline px-3 py-2 text-left text-sm font-medium text-ink" onClick={handleExitGuest} type="button">
-                Exit guest mode
-              </button>
-            </div>
-          ) : null}
-        </div>
-      </details>
+          </div>
+        </details>
+      )}
     </>
   )
 }

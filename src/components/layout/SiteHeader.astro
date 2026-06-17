@@ -2,7 +2,7 @@
 import AuthHeaderControls from '../auth/AuthHeaderControls';
 import { productNav } from '../../data/wardrobe';
 
-const { active = '/' } = Astro.props;
+const { active = '/', isPrivate = false } = Astro.props;
 ---
 
 <header class="sticky top-0 z-40 border-b border-hairline bg-canvas/90 backdrop-blur-xl">
@@ -12,6 +12,6 @@ const { active = '/' } = Astro.props;
 			<span>Digital Wardrobe</span>
 		</a>
 
-		<AuthHeaderControls active={active} nav={productNav} initialViewerState={Astro.locals.viewer?.state ?? 'none'} client:load />
+		<AuthHeaderControls active={active} nav={productNav} initialViewerState={Astro.locals.viewer?.state ?? 'none'} isPrivate={isPrivate} client:load />
 	</div>
 </header>
