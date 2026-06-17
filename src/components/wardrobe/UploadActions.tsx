@@ -98,6 +98,58 @@ function readFileAsDataUrl(file: File) {
   })
 }
 
+function compressImage(file: File, maxSizeBytes: number = 1_400_000): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement("canvas")
+        let width = img.width
+        let height = img.height
+
+        const maxEdge = 1600
+        if (Math.max(width, height) > maxEdge) {
+          const scale = maxEdge / Math.max(width, height)
+          width = Math.round(width * scale)
+          height = Math.round(height * scale)
+        }
+
+        canvas.width = width
+        canvas.height = height
+
+        const ctx = canvas.getContext("2d")
+        if (!ctx) {
+          reject(new Error("Could not initialize canvas context for compression."))
+          return
+        }
+
+        ctx.drawImage(img, 0, 0, width, height)
+
+        const byteLength = (url: string) => Math.ceil((url.length - (url.indexOf(",") + 1)) * 0.75)
+        
+        let quality = 0.85
+        let dataUrl = canvas.toDataURL("image/jpeg", quality)
+
+        while (byteLength(dataUrl) > maxSizeBytes && quality > 0.3) {
+          quality -= 0.1
+          dataUrl = canvas.toDataURL("image/jpeg", quality)
+        }
+
+        resolve(dataUrl)
+      }
+      img.onerror = () => {
+        reject(new Error("Could not load image for compression."))
+      }
+      img.src = String(e.target?.result)
+    }
+    reader.onerror = () => {
+      reject(new Error("Could not read file."))
+    }
+    reader.readAsDataURL(file)
+  })
+}
+
 export function UploadActions({ triggerClassName = "" }: UploadActionsProps) {
   const [open, setOpen] = useState(false)
   const [authReady, setAuthReady] = useState(false)
@@ -200,19 +252,29 @@ export function UploadActions({ triggerClassName = "" }: UploadActionsProps) {
       return
     }
 
+    let targetFileUrl: string
     if (file.size > 1_500_000) {
-      setError("Use an image under 1.5 MB for now.")
-      return
+      sendToast("Compressing large image...")
+      try {
+        targetFileUrl = await compressImage(file)
+      } catch (nextError) {
+        setError(nextError instanceof Error ? nextError.message : "Image could not be compressed.")
+        return
+      }
+    } else {
+      try {
+        targetFileUrl = await readFileAsDataUrl(file)
+      } catch (nextError) {
+        setError(nextError instanceof Error ? nextError.message : "Image could not be loaded.")
+        return
+      }
     }
 
-    try {
-      const dataUrl = await readFileAsDataUrl(file)
-      updateForm("imageUrl", dataUrl)
-      if (!form.name.trim()) updateForm("name", file.name.replace(/\.[^.]+$/, "").replaceAll("-", " "))
-      sendToast("Image preview ready.")
-    } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : "Image could not be loaded.")
+    updateForm("imageUrl", targetFileUrl)
+    if (!form.name.trim()) {
+      updateForm("name", file.name.replace(/\.[^.]+$/, "").replaceAll("-", " "))
     }
+    sendToast("Image preview ready.")
   }
 
   const chooseMode = (nextMode: CaptureMode) => {
