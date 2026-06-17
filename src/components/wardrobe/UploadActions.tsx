@@ -98,7 +98,7 @@ function readFileAsDataUrl(file: File) {
   })
 }
 
-function compressImage(file: File, maxSizeBytes: number = 1_400_000): Promise<string> {
+function compressImage(file: File, maxSizeBytes: number = 2_800_000): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onload = (e) => {
@@ -270,6 +270,12 @@ export function UploadActions({ triggerClassName = "" }: UploadActionsProps) {
       }
     }
 
+    const byteLength = (url: string) => Math.ceil((url.length - (url.indexOf(",") + 1)) * 0.75)
+    if (byteLength(targetFileUrl) > 3_000_000) {
+      setError("Use an image under 3.0 MB for now.")
+      return
+    }
+
     updateForm("imageUrl", targetFileUrl)
     if (!form.name.trim()) {
       updateForm("name", file.name.replace(/\.[^.]+$/, "").replaceAll("-", " "))
@@ -361,14 +367,14 @@ export function UploadActions({ triggerClassName = "" }: UploadActionsProps) {
     const byteLength = (url: string) => Math.ceil((url.length - (url.indexOf(",") + 1)) * 0.75)
     let quality = 0.82
     let dataUrl = canvas.toDataURL("image/jpeg", quality)
-    while (byteLength(dataUrl) > 1_400_000 && quality > 0.4) {
+    while (byteLength(dataUrl) > 2_800_000 && quality > 0.4) {
       quality -= 0.1
       dataUrl = canvas.toDataURL("image/jpeg", quality)
     }
-    if (byteLength(dataUrl) > 1_500_000) {
+    if (byteLength(dataUrl) > 3_000_000) {
       stopStream()
       setCamStatus("idle")
-      setError("Use an image under 1.5 MB for now.")
+      setError("Use an image under 3.0 MB for now.")
       return
     }
 
