@@ -28,3 +28,7 @@ pnpm-debug.log*
 # wrangler cache & state
 .wrangler/
 wrangler.log*
+
+# blueprint design files
+Digital Wardrobe Website Blueprint.pdf
+
