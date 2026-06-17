@@ -1,5 +1,6 @@
 import { defineMiddleware } from "astro:middleware"
 
+import { createPrismaClient, prismaStorage } from "@/lib/prisma"
 import { resolveViewer } from "@/lib/server/viewer"
 
 export const onRequest = defineMiddleware(async (context, next) => {
@@ -17,7 +18,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // Fallback if not in Cloudflare Worker context (e.g. build time or node scripts)
   }
 
-  context.locals.viewer = await resolveViewer(context.cookies)
-  return next()
+  const client = createPrismaClient()
+
+  return prismaStorage.run(client, async () => {
+    context.locals.viewer = await resolveViewer(context.cookies)
+    return next()
+  })
 })
+
 
