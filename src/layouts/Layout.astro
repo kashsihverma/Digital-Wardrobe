@@ -31,6 +31,8 @@ const viewerState = Astro.locals.viewer?.state ?? 'none';
 		<title>{title}</title>
 		
 		<!-- Google tag (gtag.js) -->
+		<link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
+		<link rel="dns-prefetch" href="https://www.googletagmanager.com" />
 		<script async src="https://www.googletagmanager.com/gtag/js?id=G-J20PVLS3SL" is:inline></script>
 		<script is:inline>
 			window.dataLayer = window.dataLayer || [];

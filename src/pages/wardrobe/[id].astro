@@ -23,7 +23,7 @@ const related = wardrobeItems.filter((candidate) => candidate.id !== item.id).sl
 		<section class="bg-canvas-soft py-8">
 			<div class="container-page">
 				<a class="inline-flex items-center gap-2 rounded-full border border-hairline bg-canvas px-3 py-2 text-sm text-body shadow-[var(--shadow-hairline)] transition hover:text-ink" href="/wardrobe">
-					<ArrowLeft size={15} stroke-width={1.8} />
+					<ArrowLeft size={15} stroke-width={1.8} aria-hidden="true" />
 					Back to wardrobe
 				</a>
 
@@ -55,7 +55,7 @@ const related = wardrobeItems.filter((candidate) => candidate.id !== item.id).sl
 						</div>
 						<div class="mt-6 flex flex-wrap gap-3">
 							<a class="inline-flex min-h-11 items-center gap-2 rounded-full bg-ink px-4 text-sm font-medium text-white" href="/outfits">
-								<Plus size={16} stroke-width={1.8} />
+								<Plus size={16} stroke-width={1.8} aria-hidden="true" />
 								Add to outfit
 							</a>
 							<button
@@ -64,7 +64,7 @@ const related = wardrobeItems.filter((candidate) => candidate.id !== item.id).sl
 								data-track="tag_confirmed"
 								type="button"
 							>
-								<CheckCircle2 size={16} stroke-width={1.8} />
+								<CheckCircle2 size={16} stroke-width={1.8} aria-hidden="true" />
 								Confirm tags
 							</button>
 						</div>
@@ -76,7 +76,7 @@ const related = wardrobeItems.filter((candidate) => candidate.id !== item.id).sl
 						<div class="rounded-lg border border-hairline bg-canvas p-5 shadow-[var(--shadow-card)]">
 							<div class="flex items-center gap-3">
 								<div class="flex size-10 items-center justify-center rounded-full bg-canvas-soft">
-									<Shirt size={16} stroke-width={1.8} />
+									<Shirt size={16} stroke-width={1.8} aria-hidden="true" />
 								</div>
 								<div>
 									<p class="text-sm font-medium text-ink">Related pieces</p>

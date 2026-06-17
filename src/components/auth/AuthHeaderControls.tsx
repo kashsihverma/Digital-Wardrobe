@@ -111,7 +111,7 @@ export function AuthHeaderControls({ active = "/", nav, initialViewerState = "no
         {user ? (
           <>
             <a className="flex h-9 items-center gap-2 rounded-full border border-hairline bg-canvas px-3 text-sm font-medium text-ink transition hover:bg-canvas-soft" href="/discover">
-              <Search className="size-4" />
+              <Search className="size-4" aria-hidden="true" />
               Search
             </a>
             <UploadActions />
@@ -119,7 +119,7 @@ export function AuthHeaderControls({ active = "/", nav, initialViewerState = "no
               className="hidden h-9 max-w-40 items-center gap-2 rounded-full border border-hairline bg-canvas px-3 text-sm font-medium text-ink shadow-[var(--shadow-hairline)] transition hover:bg-canvas-soft xl:inline-flex"
               href="/settings"
             >
-              <UserRound className="size-4 shrink-0" />
+              <UserRound className="size-4 shrink-0" aria-hidden="true" />
               <span className="truncate">{user.displayName || user.email || "Account"}</span>
             </a>
             <Button
@@ -128,7 +128,7 @@ export function AuthHeaderControls({ active = "/", nav, initialViewerState = "no
               onClick={handleSignOut}
               type="button"
             >
-              <LogOut className="size-4" />
+              <LogOut className="size-4" aria-hidden="true" />
             </Button>
           </>
         ) : isGuest ? (
@@ -142,16 +142,16 @@ export function AuthHeaderControls({ active = "/", nav, initialViewerState = "no
               onClick={handleExitGuest}
               type="button"
             >
-              <LogOut className="size-4" />
+              <LogOut className="size-4" aria-hidden="true" />
             </Button>
             <a className="inline-flex h-9 items-center gap-2 rounded-full bg-ink px-4 text-sm font-medium text-white transition hover:bg-ink/90" href="/sign-in">
-              <LogIn className="size-4" />
+              <LogIn className="size-4" aria-hidden="true" />
               Sign in to save
             </a>
           </>
         ) : (
           <a className="inline-flex h-9 items-center gap-2 rounded-full bg-ink px-4 text-sm font-medium text-white transition hover:bg-ink/90" href="/sign-in">
-            <LogIn className="size-4" />
+            <LogIn className="size-4" aria-hidden="true" />
             Sign in
           </a>
         )}
@@ -159,7 +159,7 @@ export function AuthHeaderControls({ active = "/", nav, initialViewerState = "no
 
       <details className="group relative lg:hidden">
         <summary className="flex size-10 list-none items-center justify-center rounded-full border border-hairline bg-canvas text-ink" aria-label="Open menu">
-          <Menu className="size-5" />
+          <Menu className="size-5" aria-hidden="true" />
         </summary>
         <div className="absolute right-0 mt-3 w-[min(calc(100vw-32px),340px)] rounded-lg border border-hairline bg-canvas p-2 shadow-[var(--shadow-float)]">
           <nav className="grid gap-1" aria-label="Mobile navigation">

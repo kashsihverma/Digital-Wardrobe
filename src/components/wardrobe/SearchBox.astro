@@ -6,7 +6,7 @@ const { placeholder = 'Search items, outfits, events, and ideas' } = Astro.props
 <search-box class="relative block" data-search-box>
 	<form class="flex min-h-12 items-center gap-3 rounded-lg border border-hairline bg-canvas px-3 shadow-[var(--shadow-hairline)]" role="search">
 		<label class="sr-only" for="wardrobe-search">Search wardrobe</label>
-		<Search class="text-body" size={18} stroke-width={1.8} />
+		<Search class="text-body" size={18} stroke-width={1.8} aria-hidden="true" />
 		<input
 			aria-autocomplete="list"
 			aria-controls="wardrobe-search-suggestions"
@@ -25,7 +25,7 @@ const { placeholder = 'Search items, outfits, events, and ideas' } = Astro.props
 			type="button"
 			aria-label="Open filters"
 		>
-			<SlidersHorizontal size={16} stroke-width={1.8} />
+			<SlidersHorizontal size={16} stroke-width={1.8} aria-hidden="true" />
 		</button>
 	</form>
 	<div

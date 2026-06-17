@@ -14,7 +14,7 @@ const { title, body, ctaLabel, ctaHref, ctaEvent } = Astro.props;
 
 <div class="rounded-lg border border-dashed border-hairline bg-canvas p-10 text-center shadow-[var(--shadow-card)]">
 	<div class="mx-auto flex size-12 items-center justify-center rounded-full bg-canvas-soft text-ink">
-		<Shirt size={20} stroke-width={1.6} />
+		<Shirt size={20} stroke-width={1.6} aria-hidden="true" />
 	</div>
 	<h2 class="mt-5 text-lg font-semibold text-ink">{title}</h2>
 	{body && <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-body">{body}</p>}

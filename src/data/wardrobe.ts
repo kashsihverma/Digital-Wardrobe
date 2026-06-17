@@ -42,6 +42,7 @@ export const productNav = [
 	{ href: '/outfits', label: 'Outfits' },
 	{ href: '/planner', label: 'Planner' },
 	{ href: '/discover', label: 'Discover' },
+	{ href: '/collections', label: 'Lookbooks' },
 	{ href: '/insights', label: 'Insights' },
 	{ href: '/settings', label: 'Settings' },
 ];

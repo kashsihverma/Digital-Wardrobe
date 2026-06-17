@@ -184,7 +184,7 @@ export function AuthForm() {
           href={redirectTarget}
         >
           Open wardrobe
-          <ArrowRight className="size-4" />
+          <ArrowRight className="size-4" aria-hidden="true" />
         </a>
       </div>
     )
@@ -234,7 +234,7 @@ export function AuthForm() {
           <label className="grid gap-1.5 text-sm text-body">
             Email
             <span className="relative">
-              <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-mute" />
+              <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-mute" aria-hidden="true" />
               <Input
                 autoComplete="email"
                 className="h-11 rounded-md border-hairline bg-canvas pl-10 text-sm"
@@ -266,7 +266,7 @@ export function AuthForm() {
                 onClick={() => setShowPassword((current) => !current)}
                 type="button"
               >
-                {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                {showPassword ? <EyeOff className="size-4" aria-hidden="true" /> : <Eye className="size-4" aria-hidden="true" />}
               </button>
             </span>
           </label>

@@ -28,7 +28,7 @@ import Layout from '../layouts/Layout.astro';
 									[Sparkles, 'Redirects straight into your wardrobe.'],
 								].map(([Icon, text]) => (
 									<div class="flex items-center gap-3 rounded-lg border border-white/10 bg-white/10 p-3 text-sm text-white/80">
-										<Icon size={16} stroke-width={1.8} />
+										<Icon size={16} stroke-width={1.8} aria-hidden="true" />
 										<span>{text}</span>
 									</div>
 								))}

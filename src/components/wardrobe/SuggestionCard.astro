@@ -6,7 +6,7 @@ const { suggestion } = Astro.props;
 <article class="rounded-lg border border-hairline bg-canvas p-4 shadow-[var(--shadow-card)]">
 	<div class="flex items-start gap-3">
 		<div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-ink text-white">
-			<Sparkles size={16} stroke-width={1.8} />
+			<Sparkles size={16} stroke-width={1.8} aria-hidden="true" />
 		</div>
 		<div>
 			<span class="font-mono text-xs text-body">{suggestion.tag}</span>

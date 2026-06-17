@@ -25,7 +25,10 @@ const alt = `${item.name} product photo`;
 			class="h-full w-full object-cover transition duration-300 group-hover/card:scale-[1.03]"
 			decoding="async"
 			loading={priority ? 'eager' : 'lazy'}
+			fetchpriority={priority ? 'high' : undefined}
 			src={item.imageUrl}
+			width="640"
+			height="640"
 		/>
 	) : image ? (
 		<Image
@@ -33,6 +36,7 @@ const alt = `${item.name} product photo`;
 			class="h-full w-full object-cover transition duration-300 group-hover/card:scale-[1.03]"
 			decoding="async"
 			loading={priority ? 'eager' : 'lazy'}
+			fetchpriority={priority ? 'high' : undefined}
 			sizes={compact ? '96px' : '(min-width: 1024px) 240px, 45vw'}
 			src={image}
 			widths={[96, 160, 240, 320, 480, 640]}

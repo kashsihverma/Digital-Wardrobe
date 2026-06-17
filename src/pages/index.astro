@@ -34,7 +34,7 @@ const { events, insights, outfits, suggestions, wardrobeItems } = await getDemoV
 					<div class="mt-8 flex flex-wrap gap-3">
 						<a class="inline-flex min-h-12 items-center gap-2 rounded-full bg-ink px-5 text-base font-medium text-white transition hover:bg-ink/90" href="/wardrobe">
 							Open wardrobe
-							<ArrowRight size={17} stroke-width={1.8} />
+							<ArrowRight size={17} stroke-width={1.8} aria-hidden="true" />
 						</a>
 						<a class="inline-flex min-h-12 items-center gap-2 rounded-full border border-hairline bg-canvas px-5 text-base font-medium text-ink shadow-[var(--shadow-hairline)] transition hover:bg-canvas-soft" href="/outfits">
 							Build outfit
@@ -78,13 +78,14 @@ const { events, insights, outfits, suggestions, wardrobeItems } = await getDemoV
 							alt="Tablet and phone showing a clean Digital Wardrobe interface with garment cards, outfit planning, and calendar panels"
 							class="aspect-[16/9] w-full rounded-lg object-cover"
 							loading="eager"
+							fetchpriority="high"
 							src={heroImage}
 						/>
 					</div>
 					<div class="absolute -bottom-6 left-6 right-6 hidden rounded-lg border border-hairline bg-canvas p-4 shadow-[var(--shadow-float)] md:block">
 						<div class="flex items-center gap-3">
 							<div class="flex size-10 items-center justify-center rounded-full bg-ink text-white">
-								<WandSparkles size={16} stroke-width={1.8} />
+								<WandSparkles size={16} stroke-width={1.8} aria-hidden="true" />
 							</div>
 							<div>
 								<p class="text-sm font-medium text-ink">Suggested for Friday.</p>
@@ -113,7 +114,7 @@ const { events, insights, outfits, suggestions, wardrobeItems } = await getDemoV
 					].map(([Icon, title, body]) => (
 						<article class="rounded-lg border border-hairline bg-canvas p-5 shadow-[var(--shadow-card)]">
 							<div class="flex size-10 items-center justify-center rounded-full bg-canvas-soft text-ink">
-								<Icon size={18} stroke-width={1.8} />
+								<Icon size={18} stroke-width={1.8} aria-hidden="true" />
 							</div>
 							<h3 class="mt-5 text-lg font-semibold text-ink">{title}</h3>
 							<p class="mt-2 text-sm leading-6 text-body">{body}</p>

@@ -36,7 +36,7 @@ const panels = [
 							{panels.map(([Icon, title, body]) => (
 								<article class="rounded-lg border border-hairline bg-canvas p-5 shadow-[var(--shadow-card)]">
 									<div class="flex size-10 items-center justify-center rounded-full bg-canvas-soft text-ink">
-										<Icon size={17} stroke-width={1.8} />
+										<Icon size={17} stroke-width={1.8} aria-hidden="true" />
 									</div>
 									<h2 class="mt-5 text-lg font-semibold text-ink">{title}</h2>
 									<p class="mt-2 text-sm leading-6 text-body">{body}</p>
@@ -46,7 +46,7 @@ const panels = [
 						<div class="mt-5 rounded-lg border border-hairline bg-canvas p-5 shadow-[var(--shadow-card)]">
 							<div class="flex items-center gap-3">
 								<div class="flex size-10 items-center justify-center rounded-full bg-ink text-white">
-									<ChartNoAxesColumnIncreasing size={17} stroke-width={1.8} />
+									<ChartNoAxesColumnIncreasing size={17} stroke-width={1.8} aria-hidden="true" />
 								</div>
 								<div>
 									<p class="text-sm font-medium text-ink">Wear frequency</p>
@@ -55,7 +55,12 @@ const panels = [
 							</div>
 							<div class="mt-5 grid h-64 items-end gap-2 rounded-lg bg-canvas-soft p-4 sm:grid-cols-12">
 								{[28, 40, 34, 62, 72, 48, 84, 58, 44, 70, 52, 38].map((height, index) => (
-									<div class="rounded-t-md bg-sage" style={`height: ${height}%`} title={`Month ${index + 1}`}></div>
+									<div 
+										class="rounded-t-md bg-sage" 
+										style={`height: ${height}%`} 
+										role="img" 
+										aria-label={`Month ${index + 1}: ${height}% wear frequency`}
+									></div>
 								))}
 							</div>
 						</div>
